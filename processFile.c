@@ -5,8 +5,7 @@
 
 void main(int argc, char *argv[], char *envp[]){
 
-
-printf("I'm %s\n", argv[0]);
+    
 
 
 
