@@ -1,4 +1,4 @@
-all: run forensics processFile
+all: forensics processFile
 
 forensics: forensics.c
 	gcc -Wall -Werror forensics.c -o forensics
