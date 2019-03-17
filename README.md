@@ -1,4 +1,4 @@
 # Feup.SOPE.TG1
-Repository for SOPE course's first group work
+Repository for SOPE course's first group work 
 
-System file foresics analysis 
+System file forensics analysis tool
