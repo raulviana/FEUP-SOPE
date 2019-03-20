@@ -1,13 +1,10 @@
-all: forensics processFile
+all: forensics
 
 forensics: forensics.c
 	gcc -Wall -Werror forensics.c -o forensics
 
-processFile: processFile.c
-	gcc -Wall -Werror processFile.c -o processFile
-
 clean:
-	rm -f forensics processFile
+	rm -f forensics
 
 run: forensics
 	 ./forensics

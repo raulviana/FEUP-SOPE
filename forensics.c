@@ -4,21 +4,21 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 
 int main(int argc, char* argv[], char* envp[]){
   
     
 
-    
+
     /*
     -------------------------------------------------
     Process the file and produce the required output
     ------------------------------------------------
                                                     */
-
-
     struct stat file_info;
+    char time_buffer[80];
    
     if(stat(argv[1],&file_info) < 0) return 1;
 
@@ -26,6 +26,10 @@ int main(int argc, char* argv[], char* envp[]){
     printf(",");
     printf("tipo ficheiro,"); // falta ver como se ve o tipo de ficheiro, no exemplo ASCCI TEXT
     printf("%ld,", file_info.st_size);
+
+    struct tm *accessed_stamp = localtime(&file_info.st_mtime);
+    strftime(time_buffer,80,"%FT%T", accessed_stamp);
+    printf("%s,", time_buffer);
 
     struct tm *created_stamp = localtime(&file_info.st_atime);
     strftime(time_buffer,80,"%FT%T", created_stamp);
@@ -35,14 +39,6 @@ int main(int argc, char* argv[], char* envp[]){
     strftime(time_buffer,80,"%FT%T", modified_stamp);
     printf("%s,", time_buffer);
 
-    struct tm *accessed_stamp = localtime(&file_info.st_mtime);
-    strftime(time_buffer,80,"%FT%T", accessed_stamp);
-    printf("%s\n", time_buffer);
-
-
-
-    exit(0);
-}
 
     exit(0);
 }
