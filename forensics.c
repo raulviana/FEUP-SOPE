@@ -34,10 +34,41 @@ void print(char* filemame, char* argv[]){
     printf("%s\n", time_buffer);
 }
 
+void recurs_traverse(char* list[]){
+
+   
+
+     
+}
+
+
 int main(int argc, char* argv[], char* envp[]){
   
+    pid_t pid, pidSon;
+    int status;
+    char folderContent[80];
 
-  
+    for(unsigned int i = 0; i < sizeof(folderContent); i++){
+        if(1){ //Testa se é uma pasta se for replica-se, se não for, deixa correr 
+        // folderContent[i] é uma pasta;
+        pid = fork();
+        if(pid > 0){
+                //este é o pai
+            pidSon = wait(&status);
+            if(pidSon != 0){
+                printf("Error parsing file system");
+                exit(1);
+            }
+        }
+        else{
+            //este é o filho
+            
+        }
+
+    
+    }
+}
+
 
     /*
     -------------------------------------------------
