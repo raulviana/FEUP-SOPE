@@ -7,28 +7,28 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-void print(char* filemame, char* argv[]) {
+void print(char* filename) {
 	struct stat file_info;
 	char time_buffer[80];
 
-	if (stat(argv[1], &file_info) < 0) {
+	printf("%s", filename);
+
+	if (stat(filename, &file_info) < 0) {
 		printf("Unable to get file info");
 		exit(1);
 	}
-	
 
-	printf("%s", argv[1]);
-	printf(",");
+	printf(", ");
 	printf("tipo ficheiro,"); // falta ver como se ve o tipo de ficheiro, no exemplo ASCCI TEXT
 	printf("%ld,", file_info.st_size);
 
 	struct tm *accessed_stamp = localtime(&file_info.st_mtime);
 	strftime(time_buffer, 80, "%FT%T", accessed_stamp);
-	printf("%s,", time_buffer);
+	printf("%s, ", time_buffer);
 
 	struct tm *created_stamp = localtime(&file_info.st_atime);
 	strftime(time_buffer, 80, "%FT%T", created_stamp);
-	printf("%s,", time_buffer);
+	printf("%s, ", time_buffer);
 
 	struct tm *modified_stamp = localtime(&file_info.st_ctime);
 	strftime(time_buffer, 80, "%FT%T", modified_stamp);
@@ -36,9 +36,6 @@ void print(char* filemame, char* argv[]) {
 }
 
 void recurs_traverse(char* list[]) {
-
-
-
 
 }
 
@@ -64,13 +61,17 @@ int main(int argc, char* argv[], char* envp[]) {
 		name = Dirent->d_name;
 		if (name[0] != '.') {
 			stat(name, &stat_buf);
+			if (stat(name, &stat_buf) == -1) {
+				printf("\nError in stat --- %s", name);
+				exit(1);
+			}
 			if (S_ISDIR(stat_buf.st_mode)) { //Testa se é uma pasta se for replica-se, se não for, deixa correr 
-					 // folderContent[i] é uma pasta;
+											 // folderContent[i] é uma pasta;
 				pid = fork();
 				printf("fork");
 				if (pid > 0) {
 					//este é o pai
-					printf("\nFather %s", name);
+					printf("\nParent %s", name);
 					pidSon = wait(&status);
 					if (pidSon != 0) {
 						printf("Error parsing file system");
@@ -79,14 +80,14 @@ int main(int argc, char* argv[], char* envp[]) {
 				}
 				else {
 					//este é o filho
-					printf("\nSon %s", name);
+					printf("\nChild %s", name);
 					D = opendir(name);
 					Dirent = readdir(D);
 					name = Dirent->d_name;
 
 				}
 			}
-			else print(name, argv);
+			else print(name);
 		}
 		else printf(" . ");
 		printf("\nPID = %d", pid);
@@ -105,20 +106,21 @@ int main(int argc, char* argv[], char* envp[]) {
 	int fd_out;
 
 	if (1) { //argument "-o" present
-		fd_out = open(outFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
-		if (fd_out == -1) {
-			printf("Couldn't open file to output\n");
-			return 1;
-		}
-		dup2(fd_out, STDOUT_FILENO);
-		print(outFilePath, argv);
-		fflush(stdout);
-		close(fd_out);
-		dup2(1, STDOUT_FILENO);
+	fd_out = open(outFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd_out == -1) {
+	printf("Couldn't open file to output\n");
+	return 1;
+	}
+	dup2(fd_out, STDOUT_FILENO);
+	print(outFilePath, argv);
+	fflush(stdout);
+	close(fd_out);
+	dup2(1, STDOUT_FILENO);
 	}
 	else {
-		print(outFilePath, argv);
+	print(outFilePath, argv);
 	}
 	*/
 	exit(0);
 }
+
