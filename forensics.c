@@ -63,7 +63,7 @@ int main(int argc, char* argv[], char* envp[]) {
 
  //ENVIROMENT VARIABLES
  char** env;
- char* enviroment[100]; // ??size of array 
+ char* enviroment[0]; // ??size of array 
  int c = 0;
 
     for(env=envp;*env!=0;env++)
