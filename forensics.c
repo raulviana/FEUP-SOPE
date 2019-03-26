@@ -41,6 +41,44 @@ void recurs_traverse(char* list[]) {
 
 int main(int argc, char* argv[], char* envp[]) {
 
+	char* arguments[argc-1];
+
+//SAVING ARGUMENTS 
+	int i;
+
+        printf( "argc:     %d\n", argc );
+        printf( "argv[0]:  %s\n", argv[0] );
+
+        if ( argc == 1 ) {
+                printf( "No arguments were passed.\n" );
+        } else {
+                for ( i = 1; i < argc; i++) {
+					arguments[i-1] = argv[i];
+                }
+		}
+
+		printf("Resultant array is\n"); //confirms if arguments array is correct
+		for (i = 0; i < argc-1; i++)
+			printf("%s\n", arguments[i]);
+
+ //ENVIROMENT VARIABLES
+ char** env;
+ char* enviroment[100]; // ??size of array 
+ int c = 0;
+
+    for(env=envp;*env!=0;env++)
+    {
+        char* thisEnv = *env;
+		enviroment[c]= thisEnv;
+       // printf("%s\n",thisEnv);
+		c++;
+    }
+
+	printf("Resultant array is\n"); //confirms if arguments array is correct
+		for (i = 0; i < c; i++)
+			printf("%s\n", enviroment[i]);
+ 
+
 	pid_t pid, pidSon;
 	int status;
 	//char folderContent[80];
