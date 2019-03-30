@@ -6,20 +6,50 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <string.h>
 
-void print(char* filename) {
+#define READ 0
+#define WRITE 1
+
+
+//Chama o processo externo "file" para obter o tipo de ficheiro
+char* getFileInfo(char* filename){
+ char filePath[100];
+ char outProcess[100];
+ strcpy(outProcess, "file");
+ strcpy(filePath, filename);
+ strcat(outProcess, " ");
+ strcat(outProcess, filePath);
+
+ FILE* file = popen(outProcess, "r");
+
+ if(file != NULL){
+    char buffer[100];
+    fgets(buffer, 100, file);
+    pclose(file);
+    char *FileType = strstr(buffer, " ");
+    return FileType;
+ }
+ else return NULL;
+}
+
+//Imprime caracteristicas do ficheiro
+//_____________________________________
+
+void printFileInfo(char* filename) {
 	struct stat file_info;
 	char time_buffer[80];
+	char* fileType = getFileInfo(filename);
+	strtok(fileType, "\n");
 
 	printf("%s", filename);
-
 	if (stat(filename, &file_info) < 0) {
-		printf("Unable to get file info");
+		printf("Unable to get file info"); //nao será print. mas terminr com um codigo de erro???
 		exit(1);
 	}
-
-	printf(", ");
-	printf("tipo ficheiro,"); // falta ver como se ve o tipo de ficheiro, no exemplo ASCCI TEXT
+	printf(",");
+	printf("%s", fileType);
+	printf(", "); 
 	printf("%ld,", file_info.st_size);
 
 	struct tm *accessed_stamp = localtime(&file_info.st_mtime);
@@ -34,10 +64,15 @@ void print(char* filename) {
 	strftime(time_buffer, 80, "%FT%T", modified_stamp);
 	printf("%s\n", time_buffer);
 }
+//-----------------------------------------------------------
+
+
 
 void recurs_traverse(char* list[]) {
 
 }
+
+
 
 int main(int argc, char* argv[], char* envp[]) {
 
@@ -60,17 +95,19 @@ int main(int argc, char* argv[], char* envp[]) {
 		printf("Resultant array is\n"); //confirms if arguments array is correct
 		for (i = 0; i < argc-1; i++)
 			printf("%s\n", arguments[i]);
-
+/*
  //ENVIROMENT VARIABLES
  char** env;
  char* enviroment[0]; // ??size of array 
  int c = 0;
 
+  //	variables to use in pipes
+
     for(env=envp;*env!=0;env++)
     {
         char* thisEnv = *env;
 		enviroment[c]= thisEnv;
-       // printf("%s\n",thisEnv);
+       printf("%s\n",thisEnv);
 		c++;
     }
 
@@ -78,23 +115,23 @@ int main(int argc, char* argv[], char* envp[]) {
 		for (i = 0; i < c; i++)
 			printf("%s\n", enviroment[i]);
  
-
-	pid_t pid, pidSon;
-	int status;
+*/
+	//pid_t pid, pidSon;
+//	int status;
 	//char folderContent[80];
-	char * name;
+	/*char * name;
 	printf("Running program... ");
 	DIR* D = opendir(argv[1]);
 	printf("\nOpen ");
 	struct dirent * Dirent = readdir(D);
 	printf("\nRead ");
-	struct stat stat_buf;
+	//struct stat stat_buf;*/
 
 	/*
 	O ciclo while abaixo tem como função abrir diretórios recursivamente.
 	Por algum motivo o programa é incapaz de distinguir um diretório de um ficheiro com a função S_ISDIR(stat_buf.st_mode)
 	*/
-	while (Dirent != NULL) {
+	/*while (Dirent != NULL) {
 		printf("\nWhile ");
 		name = Dirent->d_name;
 		if (name[0] != '.') {
@@ -110,7 +147,7 @@ int main(int argc, char* argv[], char* envp[]) {
 				if (pid > 0) {
 					//este é o pai
 					printf("\nParent %s", name);
-					pidSon = wait(&status);
+					//pidSon = wait(&status);
 					if (pidSon != 0) {
 						printf("Error parsing file system");
 						exit(1);
@@ -125,7 +162,7 @@ int main(int argc, char* argv[], char* envp[]) {
 
 				}
 			}
-			else print(name);
+			else printf("%s", name);
 		}
 		else printf(" . ");
 		printf("\nPID = %d", pid);
@@ -133,32 +170,32 @@ int main(int argc, char* argv[], char* envp[]) {
 	}
 
 	printf("\nEnd of While ");
-
+*/
 	/*
 	-------------------------------------------------
 	Process the file and produce the required output
 	------------------------------------------------
 	*/
-	/*
+	
 	char outFilePath[80] = "./outFile.csv";
 	int fd_out;
 
-	if (1) { //argument "-o" present
+	if (0) { //argument "-o" not present
 	fd_out = open(outFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1) {
 	printf("Couldn't open file to output\n");
 	return 1;
 	}
 	dup2(fd_out, STDOUT_FILENO);
-	print(outFilePath, argv);
+	printFileInfo(argv[1]);
 	fflush(stdout);
 	close(fd_out);
 	dup2(1, STDOUT_FILENO);
 	}
 	else {
-	print(outFilePath, argv);
+	printFileInfo(argv[1]);
 	}
-	*/
+	
 	exit(0);
 }
 
