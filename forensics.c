@@ -141,7 +141,7 @@ void recurs_traverse(char* list[]) {
 int main(int argc, char* argv[], char* envp[]) {
 
 
-int cripto = 2;
+int cripto = 3;
 /*char* arguments[argc-1];
 
 //SAVING ARGUMENTS 
