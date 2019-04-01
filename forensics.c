@@ -15,29 +15,36 @@
 
 
 //Chama o processo externo "file" para obter o tipo de ficheiro
-char getFileInfo(char* filename, char filetype[]){
+char getFileInfo(char* filename, char filetype[], char* filePath, char* file){
 
 int fd1[2], fd2[2], n;
 pid_t pid;
 pipe(fd1); pipe(fd2);
+char result[MAXLINE];
+const char token[2] = ":";
+const char* ptr;
 
 pid = fork();
 if(pid > 0){
   //parent
   close(fd1[0]); close(fd2[1]);
   write(fd1[1], filename, sizeof(filename));
-  n = read(fd2[0], filetype, MAXLINE);
-  filetype[n] = 0;
+  n = read(fd2[0], result, MAXLINE);
+  result[n] = 0;
 	int i = 0;
-	while(filetype[i]!='\0') {
-      if(filetype[i]==':') {
-        filetype[i]=',';
+	while(result[i]!='\0') {
+      if(result[i]==',') {
+        result[i]='|';
         }
         i++;
   }
+	ptr = strrchr(result, *token);
+  if(ptr != NULL) strcpy(filetype, ptr + 1);
+	else strcpy(filetype, result);
   return *filetype;
 }
 else{
+	
   char in[MAXLINE];
 	int n2;
   close(fd1[1]); close(fd2[0]);
@@ -46,7 +53,8 @@ else{
   n2 = read(fd1[0], in, sizeof(filename));
   in[n2] = 0;
   close (fd1[0]);
-  execl("/usr/bin/file", "file", in, NULL);
+	
+  execl(filePath, file, in, NULL);
   close(fd2[1]);
   exit(0);
 }
@@ -55,15 +63,27 @@ else{
 //Imprime caracteristicas do ficheiro
 //_____________________________________
 
-void printFileInfo(char* filename) {
+void printFileInfo(char* filename, int cripto) {
 	struct stat file_info;
 	char time_buffer[80];
 	char filetype[80];
-	getFileInfo(filename, filetype);
+	char filePath[] = "/usr/bin/file";
+	char file[] = "file";
+	char md5[] = "md5sum";
+	char md5Path[] = "/usr/bin/md5sum";
+	char md5result[80];
+	char sha1[] = "sha1sum";
+	char sha1Path[] = "/usr/bin/sha1sum";
+	char sha1result[80];
+	char sha256[] = "sha256sum";
+	char sha256Path[] = "/usr/bin/sha256sum";
+	char sha256result[80];
+
+	getFileInfo(filename, filetype, filePath, file);
 	strtok(filetype, "\n");
 	
-
-//	printf("%s", filename);
+	printf("%s", filename);
+	printf(",");
 	if (stat(filename, &file_info) < 0) {
 		printf("Unable to get file info"); //nao será print. mas terminr com um codigo de erro???
 		exit(1);
@@ -82,7 +102,31 @@ void printFileInfo(char* filename) {
 
 	struct tm *modified_stamp = localtime(&file_info.st_ctime);
 	strftime(time_buffer, 80, "%FT%T", modified_stamp);
-	printf("%s\n", time_buffer);
+	printf("%s", time_buffer);
+
+		if(cripto >= 1){
+		printf(", ");
+		getFileInfo(filename, md5result, md5Path, md5);
+		strtok(md5result, " ");
+	  printf("%s", md5result);
+		}
+    
+		if(cripto >= 2){
+		printf(", ");
+    getFileInfo(filename, sha1result, sha1Path, sha1);
+		strtok(sha1result, " ");
+	  printf("%s", sha1result);
+		}
+
+		if(cripto >= 3){
+		printf(", ");
+		getFileInfo(filename, sha256result, sha256Path, sha256);
+		strtok(sha256result, " ");
+		printf("%s", sha256result);
+		}
+
+		printf("\n");
+	
 }
 //-----------------------------------------------------------
 
@@ -95,7 +139,10 @@ void recurs_traverse(char* list[]) {
 
 
 int main(int argc, char* argv[], char* envp[]) {
-char* arguments[argc-1];
+
+
+int cripto = 2;
+/*char* arguments[argc-1];
 
 //SAVING ARGUMENTS 
 	int i;
@@ -114,7 +161,7 @@ char* arguments[argc-1];
 		printf("Resultant array is\n"); //confirms if arguments array is correct
 		for (i = 0; i < argc-1; i++)
 			printf("%s\n", arguments[i]);
-/*
+
  //ENVIROMENT VARIABLES
  char** env;
  char* enviroment[0]; // ??size of array 
@@ -136,7 +183,6 @@ char* arguments[argc-1];
 //int status;
 //char folderContent[80];
 
-//Dummy variables
 
 	//struct stat stat_buf;*/
 
@@ -153,8 +199,7 @@ char* arguments[argc-1];
 				printf("\nError in stat --- %s", name);
 				exit(1);
 			}
-			if (S_ISDIR(stat_buf.st_mode)) { //Testa se é uma pasta se for replica-se, se não for, deixa correr 
-											 // folderContent[i] é uma pasta;
+			if (S_ISDIR(stat_buf.st_mode)) {
 				pid = fork();
 				printf("fork");
 				if (pid > 0) {
@@ -196,20 +241,20 @@ char* arguments[argc-1];
 	char outFilePath[80] = "./outFile.csv";
 	int fd_out;
 
-	if (1) { //argument "-o" present
+	if (0) { //argument "-o" present
 	fd_out = open(outFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1) {
 	printf("Couldn't open file to output\n");
 	return 1;
 	}
 	dup2(fd_out, STDOUT_FILENO);
-	printFileInfo(argv[1]);
+	printFileInfo(argv[1], cripto);
 	fflush(stdout);
 	close(fd_out);
 	dup2(1, STDOUT_FILENO);
 	}
 	else {
-	printFileInfo(argv[1]);
+	printFileInfo(argv[1], cripto);
 	}
 	
 	exit(0);
