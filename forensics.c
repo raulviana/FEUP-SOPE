@@ -7,30 +7,49 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <string.h>
+#include <stdbool.h>
 
 #define READ 0
 #define WRITE 1
+#define MAXLINE 512
 
 
 //Chama o processo externo "file" para obter o tipo de ficheiro
-char* getFileInfo(char* filename){
- char filePath[100];
- char outProcess[100];
- strcpy(outProcess, "file");
- strcpy(filePath, filename);
- strcat(outProcess, " ");
- strcat(outProcess, filePath);
+char getFileInfo(char* filename, char filetype[]){
 
- FILE* file = popen(outProcess, "r");
+int fd1[2], fd2[2], n;
+pid_t pid;
+pipe(fd1); pipe(fd2);
 
- if(file != NULL){
-    char buffer[100];
-    fgets(buffer, 100, file);
-    pclose(file);
-    char *FileType = strstr(buffer, " ");
-    return FileType;
- }
- else return NULL;
+pid = fork();
+if(pid > 0){
+  //parent
+  close(fd1[0]); close(fd2[1]);
+  write(fd1[1], filename, sizeof(filename));
+  n = read(fd2[0], filetype, MAXLINE);
+  filetype[n] = 0;
+	int i = 0;
+	while(filetype[i]!='\0') {
+      if(filetype[i]==':') {
+        filetype[i]=',';
+        }
+        i++;
+  }
+  return *filetype;
+}
+else{
+  char in[MAXLINE];
+	int n2;
+  close(fd1[1]); close(fd2[0]);
+  dup2(fd1[0], STDIN_FILENO);
+  dup2(fd2[1], STDOUT_FILENO);
+  n2 = read(fd1[0], in, sizeof(filename));
+  in[n2] = 0;
+  close (fd1[0]);
+  execl("/usr/bin/file", "file", in, NULL);
+  close(fd2[1]);
+  exit(0);
+}
 }
 
 //Imprime caracteristicas do ficheiro
@@ -39,16 +58,17 @@ char* getFileInfo(char* filename){
 void printFileInfo(char* filename) {
 	struct stat file_info;
 	char time_buffer[80];
-	char* fileType = getFileInfo(filename);
-	strtok(fileType, "\n");
+	char filetype[80];
+	getFileInfo(filename, filetype);
+	strtok(filetype, "\n");
+	
 
-	printf("%s", filename);
+//	printf("%s", filename);
 	if (stat(filename, &file_info) < 0) {
 		printf("Unable to get file info"); //nao será print. mas terminr com um codigo de erro???
 		exit(1);
 	}
-	printf(",");
-	printf("%s", fileType);
+	printf("%s", filetype);
 	printf(", "); 
 	printf("%ld,", file_info.st_size);
 
@@ -75,8 +95,7 @@ void recurs_traverse(char* list[]) {
 
 
 int main(int argc, char* argv[], char* envp[]) {
-
-	char* arguments[argc-1];
+char* arguments[argc-1];
 
 //SAVING ARGUMENTS 
 	int i;
@@ -100,9 +119,7 @@ int main(int argc, char* argv[], char* envp[]) {
  char** env;
  char* enviroment[0]; // ??size of array 
  int c = 0;
-
   //	variables to use in pipes
-
     for(env=envp;*env!=0;env++)
     {
         char* thisEnv = *env;
@@ -110,21 +127,17 @@ int main(int argc, char* argv[], char* envp[]) {
        printf("%s\n",thisEnv);
 		c++;
     }
-
 	printf("Resultant array is\n"); //confirms if arguments array is correct
 		for (i = 0; i < c; i++)
 			printf("%s\n", enviroment[i]);
  
 */
-	//pid_t pid, pidSon;
-//	int status;
-	//char folderContent[80];
-	/*char * name;
-	printf("Running program... ");
-	DIR* D = opendir(argv[1]);
-	printf("\nOpen ");
-	struct dirent * Dirent = readdir(D);
-	printf("\nRead ");
+//pid_t pid, pidSon;
+//int status;
+//char folderContent[80];
+
+//Dummy variables
+
 	//struct stat stat_buf;*/
 
 	/*
@@ -171,6 +184,9 @@ int main(int argc, char* argv[], char* envp[]) {
 
 	printf("\nEnd of While ");
 */
+
+
+
 	/*
 	-------------------------------------------------
 	Process the file and produce the required output
@@ -180,7 +196,7 @@ int main(int argc, char* argv[], char* envp[]) {
 	char outFilePath[80] = "./outFile.csv";
 	int fd_out;
 
-	if (0) { //argument "-o" not present
+	if (1) { //argument "-o" present
 	fd_out = open(outFilePath, O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd_out == -1) {
 	printf("Couldn't open file to output\n");
