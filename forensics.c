@@ -130,14 +130,70 @@ void printFileInfo(char* filename, int cripto) {
 
 
 
-void recurs_traverse(char entryFile[], int count) {
-}
+//Recebe char e se for ficheiro imprime os seus stats, senao de forma recursiva percorre o diretorio
+//--------------------------------------------------------------------------------------------------
+void recurFolder(char entryFile[]){
 
+char content[512]; //1024 possible objects in each folder each one with max 256 caracters in name
+char temp[512];
+
+DIR* Dir;
+struct dirent* DirEntry;
+      
+    struct stat filestat;
+    stat(entryFile, &filestat); 
+    
+    	
+    if(S_ISDIR(filestat.st_mode)){ //entryfFile e um diretorio
+    
+    Dir = opendir(entryFile);
+
+    if (Dir == NULL) {
+    	printf("Error reading directory %s", entryFile); //para log?
+    	exit(2);
+    }
+    while ((DirEntry = readdir(Dir)) != NULL) {
+        
+        content[0] = '\0';
+        strcpy(temp, DirEntry->d_name); 
+        strcat(content, entryFile);
+        strcat(content, "/");
+        strcat(content, temp);
+        
+        stat(content, &filestat);
+
+        if(S_ISDIR(filestat.st_mode)){   //se este conteudo da pasta for diretorio, entra em recursao
+          if((temp[0] != '.' && temp[1] != '.') ||   //Filtra diretorios do tipo '.' e '..'
+            (temp[0] != '.' && temp[1] != '\0')) {
+              
+          
+           printf("dir: %s \n", content);
+           recurFolder(content);
+          }
+        }
+        else{
+            printf("wFile: %s \n", content);
+            //cahma analide do ficheiro
+        }
+        
+            //strcat(content, "/");
+        //strcat(content, temp);
+       
+      
+    }
+    closedir(Dir);
+    }
+ else{    // Entryfile e um ficheiro
+    		  
+           printf("File: %s \n", entryFile);
+           //pede a analise de ficheiro
+       }
+}
 
 
 int main(int argc, char* argv[], char* envp[]) {
 
-char* arguments[argc-1];
+/*char* arguments[argc-1];
 
 //SAVING ARGUMENTS 
 	int i;
@@ -148,10 +204,10 @@ char* arguments[argc-1];
                 for ( i = 1; i < argc; i++) {
 					arguments[i-1] = argv[i];
                 }
-		}
+		}*/
 
-
-int cripto = 3; //number of criptographic hashes asked
+char entryFile[] = "folder";
+//int cripto = 3; //number of criptographic hashes asked
 
 
 /*int count = 0;
@@ -179,13 +235,13 @@ strcat(entryFile[count], arguments[argc-1]);*/
 */
 
 
-//recurs_traverse(entryFile[count], count);
+recurFolder(entryFile);
 
 
 /*-------------------------------------------------
 	Process the file and produce the required output
 	------------------------------------------------
-	*/
+	
 	
 	char outFilePath[80] = "./outFile.csv";
 	int fd_out;
@@ -204,7 +260,7 @@ strcat(entryFile[count], arguments[argc-1]);*/
 	}
 	else {
 	printFileInfo(argv[1], cripto);
-	}
+	}*/
 	
 	exit(0);
 }
