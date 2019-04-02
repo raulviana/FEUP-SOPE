@@ -124,31 +124,23 @@ void printFileInfo(char* filename, int cripto) {
 		strtok(sha256result, " ");
 		printf("%s", sha256result);
 		}
-
 		printf("\n");
-	
 }
 //-----------------------------------------------------------
 
 
 
-void recurs_traverse(char* list[]) {
-
+void recurs_traverse(char entryFile[], int count) {
 }
 
 
 
 int main(int argc, char* argv[], char* envp[]) {
 
-
-int cripto = 3;
-/*char* arguments[argc-1];
+char* arguments[argc-1];
 
 //SAVING ARGUMENTS 
 	int i;
-
-        printf( "argc:     %d\n", argc );
-        printf( "argv[0]:  %s\n", argv[0] );
 
         if ( argc == 1 ) {
                 printf( "No arguments were passed.\n" );
@@ -158,10 +150,17 @@ int cripto = 3;
                 }
 		}
 
-		printf("Resultant array is\n"); //confirms if arguments array is correct
-		for (i = 0; i < argc-1; i++)
-			printf("%s\n", arguments[i]);
 
+int cripto = 3; //number of criptographic hashes asked
+
+
+/*int count = 0;
+char entryFile[1];
+strcat(entryFile, "./");
+strcat(entryFile[count], arguments[argc-1]);*/
+
+
+/*
  //ENVIROMENT VARIABLES
  char** env;
  char* enviroment[0]; // ??size of array 
@@ -177,63 +176,13 @@ int cripto = 3;
 	printf("Resultant array is\n"); //confirms if arguments array is correct
 		for (i = 0; i < c; i++)
 			printf("%s\n", enviroment[i]);
- 
-*/
-//pid_t pid, pidSon;
-//int status;
-//char folderContent[80];
-
-
-	//struct stat stat_buf;*/
-
-	/*
-	O ciclo while abaixo tem como função abrir diretórios recursivamente.
-	Por algum motivo o programa é incapaz de distinguir um diretório de um ficheiro com a função S_ISDIR(stat_buf.st_mode)
-	*/
-	/*while (Dirent != NULL) {
-		printf("\nWhile ");
-		name = Dirent->d_name;
-		if (name[0] != '.') {
-			stat(name, &stat_buf);
-			if (stat(name, &stat_buf) == -1) {
-				printf("\nError in stat --- %s", name);
-				exit(1);
-			}
-			if (S_ISDIR(stat_buf.st_mode)) {
-				pid = fork();
-				printf("fork");
-				if (pid > 0) {
-					//este é o pai
-					printf("\nParent %s", name);
-					//pidSon = wait(&status);
-					if (pidSon != 0) {
-						printf("Error parsing file system");
-						exit(1);
-					}
-				}
-				else {
-					//este é o filho
-					printf("\nChild %s", name);
-					D = opendir(name);
-					Dirent = readdir(D);
-					name = Dirent->d_name;
-
-				}
-			}
-			else printf("%s", name);
-		}
-		else printf(" . ");
-		printf("\nPID = %d", pid);
-		Dirent = readdir(D);
-	}
-
-	printf("\nEnd of While ");
 */
 
 
+//recurs_traverse(entryFile[count], count);
 
-	/*
-	-------------------------------------------------
+
+/*-------------------------------------------------
 	Process the file and produce the required output
 	------------------------------------------------
 	*/
