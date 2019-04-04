@@ -185,68 +185,7 @@ void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
 
 
 
-//Recebe char e se for ficheiro imprime os seus stats, senao de forma recursiva percorre o diretorio
-//--------------------------------------------------------------------------------------------------
-void recurFolder(char entryFile[], char outFilePath[], int cripto){
 
-char content[512];
-char temp[512];
-
-DIR* Dir;
-struct dirent* DirEntry;
-      
-    struct stat filestat;
-    stat(entryFile, &filestat); 
-    
-if(S_ISDIR(filestat.st_mode)){ //entryfFile e um diretorio, faz fork e processa o conteudo noutro processo
-
-    Dir = opendir(entryFile);
-
-    if (Dir == NULL) {
-    	printf("Error reading directory %s", entryFile); //para log?
-    	exit(2);
-    }
-    while ((DirEntry = readdir(Dir)) != NULL) {
-        
-        content[0] = '\0';
-        strcpy(temp, DirEntry->d_name); 
-        strcat(content, entryFile);
-        strcat(content, "/");
-        strcat(content, temp);
-        stat(content, &filestat);
-
-        if(S_ISDIR(filestat.st_mode)){   //se este conteudo da pasta for diretorio, entra em recursao
-          if((temp[0] != '.' && temp[1] != '.') ||   //Filtra diretorios do tipo '.' e '..'
-            (temp[0] != '.' && temp[1] != '\0')) {
-
-		              pid_t pid, childPid;
-		              int status;
-              
-		              pid = fork();
-              
-		              if(pid != 0){ //parent
-		                 childPid = wait(&status);
-		              	 if(childPid == -1){
-		              		 printf("Error parsing directory system");
-		              		 return;
-		              	 }
-		              }
-		              else{ //child
-							      recurFolder(content, outFilePath, cripto);
-									}
-          }
-        }
-        else{   //chama analide do ficheiro
-          printFileInfo(content, cripto, outFilePath);            
-        }
-    }
-    closedir(Dir);
-    }		
-else{    // Entryfile e um ficheiro, pede a sua analise
-    strcpy(content, entryFile);
-    printFileInfo(content, cripto, outFilePath); 
- }
-}
 
 
 int main(int argc, char* argv[], char* envp[]) {
@@ -263,9 +202,9 @@ int main(int argc, char* argv[], char* envp[]) {
 					arguments[i-1] = argv[i];
                 }
 		}*/
-char outFilePath[] = "./outFile.csv";
+//char outFilePath[] = "./outFile.csv";
 char entryFile[] = "folder";
-int cripto = 3; //number of criptographic hashes asked
+//int cripto = 3; //number of criptographic hashes asked
 
 /*
  //ENVIROMENT VARIABLES
@@ -285,22 +224,68 @@ int cripto = 3; //number of criptographic hashes asked
 			printf("%s\n", enviroment[i]);
 */
 
+//Recebe char e se for ficheiro imprime os seus stats, senao de forma recursiva percorre o diretorio
+//--------------------------------------------------------------------------------------------------
 
-recurFolder(entryFile, outFilePath, cripto);
+char content[512];
+char temp[512];
+DIR* Dir;
+struct dirent* DirEntry;
+      
+struct stat filestat;
+stat(entryFile, &filestat); 
+    
+if(S_ISDIR(filestat.st_mode)){ //entryfFile e um diretorio, faz fork e processa o conteudo noutro processo
 
+    Dir = opendir(entryFile);
+    if (Dir == NULL) {
+    	printf("Error reading directory %s", entryFile); //para log?
+    	exit(2);
+    }
 
-/*-------------------------------------------------
-	Process the file and produce the required output
-	------------------------------------------------
+    while ((DirEntry = readdir(Dir)) != NULL) {
+        content[0] = '\0';
+        temp[0] = '\0';
+        strcpy(temp, DirEntry->d_name); 
+        strcat(content, entryFile);
+        strcat(content, "/");
+        strcat(content, temp);
+        stat(content, &filestat);
 
-	
+        if(S_ISDIR(filestat.st_mode)){   //se este conteudo da pasta for diretorio, entra em recursao
+          if((temp[0] != '.' && temp[1] != '.') ||   //Filtra diretorios do tipo '.' e '..'
+            (temp[0] != '.' && temp[1] != '\0')) {
 
-	
-	}
-	else {
-	printFileInfo(argv[1], cripto);
-	}*/
-	
-	exit(0);
+		              pid_t pid;
+		              int status;
+		              pid = fork();
+              
+		              if(pid != 0){ //parent
+                      wait(&status);
+                      if (WIFEXITED(status)) 
+        printf("Exit status: %d\n", WEXITSTATUS(status)); 
+		              }
+		              else{ //child
+							strcat(entryFile, "/");
+                            strcat(entryFile, temp);
+							Dir = opendir(entryFile);
+                            if (Dir == NULL) {
+    	                        printf("Error reading directory in child %s", entryFile); //para log?
+    	                        exit(2);
+                            }
+				    	}
+          }
+        }
+        else{   //chama analide do ficheiro
+        printf("%s\n", temp);          
+        }
+    }
+    closedir(Dir);
+    }		
+else{    // Entryfile e um ficheiro, pede a sua analise
+    printf("%d  %s\n", getpid(), content); 
+ }
+
+exit(0);
 }
 
