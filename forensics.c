@@ -15,6 +15,7 @@
 #define MAXLINE 512
 
 
+
 //Chama o processo externo "file" para obter o tipo de ficheiro
 char getFileInfo(char* filenamePtr, char filetype[], char* filePathPtr, char* filePtr){
 
@@ -203,7 +204,7 @@ int main(int argc, char* argv[], char* envp[]) {
                 }
 		}*/
 //char outFilePath[] = "./outFile.csv";
-char entryFile[] = "folder";
+//char entryFile[] = "folder";
 //int cripto = 3; //number of criptographic hashes asked
 
 /*
@@ -226,7 +227,7 @@ char entryFile[] = "folder";
 
 //Recebe char e se for ficheiro imprime os seus stats, senao de forma recursiva percorre o diretorio
 //--------------------------------------------------------------------------------------------------
-
+char entryFile[512] = "/home/raulviana/Documentos/sope/Feup.SOPE.TG1";
 char content[512];
 char temp[512];
 DIR* Dir;
@@ -262,8 +263,8 @@ if(S_ISDIR(filestat.st_mode)){ //entryfFile e um diretorio, faz fork e processa 
               
 		              if(pid != 0){ //parent
                       wait(&status);
-                      if (WIFEXITED(status)) 
-        printf("Exit status: %d\n", WEXITSTATUS(status)); 
+                     // if (WIFEXITED(status)) 
+                      //printf("Exit status: %d\n", WEXITSTATUS(status)); 
 		              }
 		              else{ //child
 							strcat(entryFile, "/");
@@ -286,6 +287,6 @@ else{    // Entryfile e um ficheiro, pede a sua analise
     printf("%d  %s\n", getpid(), content); 
  }
 
-exit(0);
+ exit(0);
 }
 
