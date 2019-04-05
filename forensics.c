@@ -21,6 +21,46 @@ void printEvent(char * act, char * value) {
 
 }
 
+void my_handler(int signum)
+{
+    if (signum == SIGUSR1)
+    {
+        printf("Received SIGUSR1!\n");
+    }
+}
+
+void handler(int signum){
+	pid_t childPid;  // the child process that the execution will soon run inside of. 
+	childPid = fork();
+
+if(childPid == 0)  // fork succeeded 
+{   
+   // Do something   
+   exit(0); 
+}
+
+else if(childPid < 0)  // fork failed 
+{    
+   // log the error
+}
+
+else  // Main (parent) process after fork succeeds 
+{    
+    int returnStatus;    
+    waitpid(childPid, &returnStatus, 0);  // Parent process waits here for child to terminate.
+
+    if (returnStatus == 0)  // Verify child process terminated without error.  
+    {
+       printf("The child process terminated normally.");    
+    }
+
+    if (returnStatus == 1)      
+    {
+       printf("The child process terminated with an error!.");    
+    }
+}
+}
+
 //Chama o processo externo "file" para obter o tipo de ficheiro
 char getFileInfo(char* nameFilePtr, char filetype[], char* filePathPtr, char* filePtr) {
 
@@ -193,6 +233,10 @@ void printFileInfo(char nameFilePtr[], int checksums, char outFilePathPtr[], int
 
 int main(int argc, char *argv[], char **envp) {
 
+
+  signal(SIGINT, handler);
+  signal(SIGUSR1, my_handler);
+  signal(SIGUSR2, my_handler);
 	/*char* arguments[argc-1];
 	//SAVING ARGUMENTS
 	int i;
