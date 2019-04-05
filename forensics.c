@@ -10,14 +10,10 @@
 #include <stdbool.h>
 #include <wait.h>
 
-#define READ 0
-#define WRITE 1
 #define MAXLINE 512
 
-
-
 //Chama o processo externo "file" para obter o tipo de ficheiro
-char getFileInfo(char* filenamePtr, char filetype[], char* filePathPtr, char* filePtr){
+char getFileInfo(char* nameFilePtr, char filetype[], char* filePathPtr, char* filePtr){
 
 int fd1[2], fd2[2], n;
 pid_t pid;
@@ -25,19 +21,20 @@ pipe(fd1); pipe(fd2);
 char result[MAXLINE];
 const char token[2] = ":";
 const char* ptr;
-char filename[512];     //File to be procesed by the co-process
-strcpy(filename, filenamePtr);
+char nameFile[512];     //File to be procesed by the co-process
+nameFile[0] = '\0';
+strcpy(nameFile, nameFilePtr);
 char filePath[512];    //Co-Proces path to be called 
 strcpy(filePath, filePathPtr);
 char file[512];       //Co-Process name to be called
 strcpy(file, filePath);   
 
-
+int status;
 pid = fork();
 if(pid > 0){
   //parent
   close(fd1[0]); close(fd2[1]);
-  write(fd1[1], filename, sizeof(filename));
+  write(fd1[1], nameFile, sizeof(nameFile));
   n = read(fd2[0], result, MAXLINE);
   result[n] = 0;
 	int i = 0;
@@ -50,6 +47,7 @@ if(pid > 0){
 	ptr = strrchr(result, *token);
   if(ptr != NULL) strcpy(filetype, ptr + 1);
 	else strcpy(filetype, result);
+	wait(&status);
   return *filetype;
 }
 else{
@@ -59,7 +57,7 @@ else{
   close(fd1[1]); close(fd2[0]);
   dup2(fd1[0], STDIN_FILENO);
   dup2(fd2[1], STDOUT_FILENO);
-  n2 = read(fd1[0], in, sizeof(filename));
+  n2 = read(fd1[0], in, sizeof(nameFile));
   in[n2] = 0;
   close (fd1[0]);
 	
@@ -87,7 +85,7 @@ void cleanName(char name[]){
 
 //Imprime caracteristicas do ficheiro
 //_____________________________________
-void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
+void printFileInfo(char nameFilePtr[], int checksums, char outFilePathPtr[], int toFile) {
   
 	struct stat file_info;
 	char time_buffer[80];
@@ -103,16 +101,15 @@ void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
 	char sha256[] = "sha256sum";
 	char sha256Path[] = "/usr/bin/sha256sum";
 	char sha256result[80];
-  char filename[256];
+  char nameFile[256];
 	int fd_out;
-	strcpy(filename, filenamePtr);
-	
-	getFileInfo(filename, filetype, filePath, file);
+	strcpy(nameFile, nameFilePtr);
+	getFileInfo(nameFile, filetype, filePath, file);
 	strtok(filetype, "\n");  //retira o newline
 
 	// Changes the output to te specified file
 	//------------------------------------------
-	if (0) { //argument "-o" present
+	if (!toFile) { //argument "-o" present
 	
 	char outFilePath[256];
 	strcpy(outFilePath, outFilePathPtr);
@@ -124,17 +121,16 @@ void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
 	dup2(fd_out, STDOUT_FILENO);
 	}
 	//-------------------------------------------
-
-	if (stat(filename, &file_info) < 0) {
-		printf("Error in %d Unable to get file info", getpid()); //nao será print. mas terminr com um codigo de erro???
+  
+	if (stat(nameFile, &file_info) < 0) {
+		printf("Error in %d Unable to get file info\n", getpid()); //nao será print. mas terminr com um codigo de erro???
 		exit(1);
 	}
-	char tempFileName[512];
-	strcpy(tempFileName, filename); // guarda-se temporariamente o caminho completo, pois filename vai ser usado mais à frente novamente 
-	cleanName(filename);
-	printf("%d ", getpid());
-	printf("%s", filename);
-	strcpy(filename, tempFileName); //volta-se a repor filename com o caminho completo para o ficheiro
+	char tempnameFile[512];
+	strcpy(tempnameFile, nameFile); // guarda-se temporariamente o caminho completo, pois nameFile vai ser usado mais à frente novamente 
+	cleanName(nameFile);
+	printf("%s", nameFile);
+	strcpy(nameFile, tempnameFile); //volta-se a repor nameFile com o caminho completo para o ficheiro
 	printf(",");
 	printf("%s", filetype);
 	printf(", "); 
@@ -152,31 +148,32 @@ void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
 	strftime(time_buffer, 80, "%FT%T", modified_stamp);
 	printf("%s", time_buffer);
 
-		if(cripto >= 1){
+		if(checksums >= 1){
 		printf(", ");
-		getFileInfo(filename, md5result, md5Path, md5);
+		getFileInfo(nameFile, md5result, md5Path, md5);
 		strtok(md5result, " ");
 	  printf("%s", md5result);
 		}
     
-		if(cripto >= 2){
+		if(checksums >= 2){
 		printf(", ");
-    getFileInfo(filename, sha1result, sha1Path, sha1);
+    getFileInfo(nameFile, sha1result, sha1Path, sha1);
 		strtok(sha1result, " ");
 	  printf("%s", sha1result);
 		}
 
-		if(cripto >= 3){
+		if(checksums >= 3){
 		printf(", ");
-		getFileInfo(filename, sha256result, sha256Path, sha256);
+		getFileInfo(nameFile, sha256result, sha256Path, sha256);
 		strtok(sha256result, " ");
 		printf("%s", sha256result);
 		}
+		
 		printf("\n");
 
 	// Replaces the output back to stdout
 	//----------------------------------
-	if(0){  //argument "-o" present
+	if(!toFile){  //argument "-o" present
 		fflush(stdout);
 	  close(fd_out);
 	  dup2(1, STDOUT_FILENO);
@@ -185,11 +182,7 @@ void printFileInfo(char filenamePtr[], int cripto, char outFilePathPtr[]) {
 //-----------------------------------------------------------
 
 
-
-
-
-
-int main(int argc, char* argv[], char* envp[]) {
+int main(int argc, char *argv[], char **envp){
 
 /*char* arguments[argc-1];
 
@@ -202,10 +195,36 @@ int main(int argc, char* argv[], char* envp[]) {
                 for ( i = 1; i < argc; i++) {
 					arguments[i-1] = argv[i];
                 }
-		}*/
-//char outFilePath[] = "./outFile.csv";
-//char entryFile[] = "folder";
-//int cripto = 3; //number of criptographic hashes asked
+		}
+
+		for (i = 0; i < argc; i++)
+			printf("%s\n", arguments[i]);
+		*/
+	//Para as variaveis de ambiente acho que devemos fazer um vetor, mas para estas seria
+	//mais pratico fazer assim, o que acham? 
+
+
+
+
+char sumsAsked[MAXLINE];						      //
+strcpy(sumsAsked, argv[3]);           //
+int checksums = 0;                     //
+char s[2] = ",";                     //
+char* token;                         //Calcula o numero de hashes que serao calculadas,posteriormente poderia-se ver quais sao efectivamente pedidas                    //
+token = strtok(sumsAsked, s);       //
+while( token != NULL ) {            //
+  token = strtok(NULL, s);          //
+  checksums++;
+}
+
+char outFilePath[MAXLINE];
+strcpy(outFilePath, argv[5]);
+char entryFile[512];
+strcpy(entryFile, argv[7]);
+int argumentO;
+char toFile[MAXLINE];
+strcpy(toFile, argv[4]);
+argumentO = strcmp(toFile, "-o");
 
 /*
  //ENVIROMENT VARIABLES
@@ -225,9 +244,6 @@ int main(int argc, char* argv[], char* envp[]) {
 			printf("%s\n", enviroment[i]);
 */
 
-//Recebe char e se for ficheiro imprime os seus stats, senao de forma recursiva percorre o diretorio
-//--------------------------------------------------------------------------------------------------
-char entryFile[512] = "/home/raulviana/Documentos/sope/Feup.SOPE.TG1";
 char content[512];
 char temp[512];
 DIR* Dir;
@@ -278,13 +294,13 @@ if(S_ISDIR(filestat.st_mode)){ //entryfFile e um diretorio, faz fork e processa 
           }
         }
         else{   //chama analide do ficheiro
-        printf("%s\n", temp);          
+        printFileInfo(content, checksums, outFilePath, argumentO);          
         }
     }
     closedir(Dir);
     }		
 else{    // Entryfile e um ficheiro, pede a sua analise
-    printf("%d  %s\n", getpid(), content); 
+    printFileInfo(content, checksums,outFilePath, argumentO);
  }
 
  exit(0);
