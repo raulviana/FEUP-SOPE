@@ -1,0 +1,24 @@
+7338 - 0 - OPENED folder 
+7338 - 1 - ANALIZED folder/file1 
+7343 - -1 - OPENED folder/anotherFolder 
+7344 - -1 - OPENED folder/anotherFolder/folder2 
+7344 - 0 - ANALIZED folder/anotherFolder/folder2/moretest 
+7344 - 0 - EXIT  
+7338 - 0 - OPENED folder 
+7338 - 1 - ANALIZED folder/file1 
+7343 - -1 - OPENED folder/anotherFolder 
+7343 - 0 - ANALIZED folder/anotherFolder/gf.txt 
+7353 - -1 - OPENED folder/anotherFolder/folder3 
+7353 - 0 - ANALIZED folder/anotherFolder/folder3/file5 
+7353 - 0 - EXIT  
+7338 - 0 - OPENED folder 
+7338 - 1 - ANALIZED folder/file1 
+7343 - -1 - OPENED folder/anotherFolder 
+7343 - 0 - ANALIZED folder/anotherFolder/gf.txt 
+7343 - 0 - EXIT  
+7338 - 0 - OPENED folder 
+7338 - 1 - ANALIZED folder/file1 
+7338 - 1 - ANALIZED folder/.file4 
+7338 - 1 - ANALIZED folder/file2 
+7338 - 2 - ANALIZED folder/file3 
+7338 - 2 - EXIT  
