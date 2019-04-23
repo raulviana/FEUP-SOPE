@@ -1,0 +1,14 @@
+1. cliente/servidor criar fifos entre os dois programas, depois de iniciados, garantir a comunicacao
+
+2. pool de threads
+
+3. autenticacao entre os dois programas
+
+4. array <contas>  - mecanismos de sincronizaçao ->pryority<-
+
+5. operaçoes : estrutura de emensagem e mensagens de erro
+
+6. mecanisnmos de sincronizacao na fila de pedidos
+
+
+->acrescentar delays para criar conflitos
