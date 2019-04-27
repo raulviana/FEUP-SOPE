@@ -1,3 +1,4 @@
+
 all: server
 
 server: server.c
