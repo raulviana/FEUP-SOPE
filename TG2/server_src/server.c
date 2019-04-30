@@ -35,7 +35,7 @@ int main(int argc, char*argv[]){
         exit(-3);
        }
     
-    createAccount.account_id = 0;
+    createAccount.account_id = ADMIN_ACCOUNT_ID;
     createAccount.balance = 0;
     strcpy(createAccount.password, argv[2]);
         
