@@ -10,6 +10,7 @@
 #include <signal.h>
 #include "../constants.h"
 #include "../types.h"
+#include "../log.c"
 
 #define ERR_ARGS 2
 #define ERR_FIFO 3
@@ -46,7 +47,7 @@ void send_message(tlv_request_t message){
 }
 
 void alarm_hanlder(){
-    //write in log
+    //TODO write in log
     exit(0);
 }
 void setup_alarm(){
@@ -62,18 +63,24 @@ void receive_message(char *strPid){
     strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
     strcat(fifo_name, strPid);
 
-    printf("%s\n", fifo_name);
-    exit(0);
-
     FILE* fifo_response = fopen(fifo_name, "r");
-
+    if(fifo_response == NULL){
+        printf("Error: Failed to open client fifo for reading.\n");
+        exit(ERR_FIFO);
+    }
+    
+    tlv_reply_t *message_received;
+    //Read message
+    //Será apenas preciso aceder ao ret_code, como???
+    int log_result = logReply(fifo_response, getpid(), *message_received); 
+   
 
 
 }
 
 
 
-/*void getWidth(char *arg[], int width){
+/*void setWidth(char *arg[], int width){
     
     strcat(account_ID, argv[1]);
     while((strlen(account_final) + strlen(account_ID)) <= WIDTH_ACCOUNT - 1){
@@ -229,31 +236,11 @@ int main(int argc, char *argv[])
 
     //*************************************************
 
-    //****************Server fifo **********************
-    //mkfifo(SERVER_FIFO_PATH, 0777);
-    /*if (mkfifo(SERVER_FIFO_PATH, 0777) < 0){
-        if (errno == EEXIST){
-            printf("FIFO '/tmp/requests' already exists\n");
-            send_message(message_send);
-        }
-        else
-            printf("Can't create FIFO\n");
-    }
-    else
-        printf("FIFO '/tmp/requests' sucessfully created\n");
-    
-    printf("message_send");
+  
+
     send_message(message_send);
 
-    if (unlink(SERVER_FIFO_PATH) < 0)
-        printf("Error when destroying FIFO '/tmp/requests'\n");
-    else
-        printf("FIFO '/tmp/requests' has been destroyed\n");
-    *///*********************************************
-
-    //send_message(message_send);
-
-    receive_message(strPid);
+   // receive_message(strPid);
 
     return 0;
 }
