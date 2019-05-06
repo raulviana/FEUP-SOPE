@@ -72,7 +72,7 @@ void receive_message(char *strPid){
     tlv_reply_t *message_received;
     //Read message
     //Será apenas preciso aceder ao ret_code, como???
-    int log_result = logReply(fifo_response, getpid(), *message_received); 
+    //int log_result = logReply(fifo_response, getpid(), *message_received); 
    
 
 

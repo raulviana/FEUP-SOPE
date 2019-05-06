@@ -9,10 +9,13 @@
 #include <string.h>
 #include "../constants.h"
 #include "../types.h"
+#include "../crypto.c"
 #include <sys/file.h>
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
+
+#define MAX_LINE 512
 
 void print_usage(FILE *stream)
 {
@@ -44,18 +47,43 @@ int main(int argc, char*argv[]){
        }
     //*************************************************************************************
 
+    //Criacao da conta de administrador
+    char new_salt[HASH_LEN];
+    new_salt[0] = '\0';
+
+    createSalt(*new_salt);
+
+    return 0;
 
 
     //****************Server fifo **********************
-    int fd;
+    int fd, fd_dummy;
+   // char line[MAX_LINE];
+   // line[0] = '\0';
+
     if (mkfifo(SERVER_FIFO_PATH,0660)<0)
- if (errno==EEXIST) printf("FIFO '/tmp/requests' already exists\n");
- else printf("Can't create FIFO\n");
-else printf("FIFO '/tmp/requests' sucessfully created\n");
-if ((fd=open(SERVER_FIFO_PATH,O_RDONLY)) !=-1)
- printf("FIFO '/tmp/requests' openned in READONLY mode\n"); 
+        if (errno==EEXIST) printf("Requests FIFO already exists\n");
+        else {
+            printf("Can't create Requests FIFO\n");
+            print_usage(stderr);
+            exit(ERR_FIFO);
+        }
+    else printf("Requests FIFO sucessfully created\n");
+    if ((fd=open(SERVER_FIFO_PATH,O_RDONLY)) !=-1)
+        printf("Requests FIFO created in READONLY mode\n"); 
+    if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
+        printf("Request FIFO openned in WRITEONLY mode\n");
     //************************************************************
 
+    /*do {
+        read(fd,&line, ;
+        if (opcode!=0) {
+        read(fd,name,MAX_NAME_LEN);
+        printf("%s has requested operation %d\n",name,opcode);
+        }
+    } while (opcode!=0);*/
+     
+    //Read from FIFO
 
 
 
@@ -64,6 +92,8 @@ if ((fd=open(SERVER_FIFO_PATH,O_RDONLY)) !=-1)
 
 
 
+    close(fd);
+    close(fd_dummy);
     //*******************Erase FIFO******************************
     if (unlink(SERVER_FIFO_PATH) < 0)
         printf("Error when destroying FIFO '/tmp/requests'\n");
