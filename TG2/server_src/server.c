@@ -45,13 +45,22 @@ int main(int argc, char*argv[]){
         print_usage(stderr);
         exit(ERR_ARGS);
        }
+    password[strlen(password)] = '\0';
+    printf("%ld\n", strlen(password));
     //*************************************************************************************
 
     //Criacao da conta de administrador
     char new_salt[HASH_LEN];
+    char passSalted[strlen(password) + HASH_LEN];
+    passSalted[0] = '\0';
     new_salt[0] = '\0';
 
-    createSalt(*new_salt);
+    createSalt(new_salt);
+
+   strcat(passSalted, password);
+   strcat(passSalted, new_salt);   //ready to sha256sum
+   //TODO make sha256sum a passSalted
+   //TODO dcriar array de contas e abrir conta de admimnostrador
 
     return 0;
 
