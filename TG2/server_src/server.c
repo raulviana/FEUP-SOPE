@@ -1,21 +1,26 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/file.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
+
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
-#include <sys/file.h>
+
+#include "reply_message.c" 
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
 
 #define MAX_LINE 512
+#define SHA_LONG 64
+
 
 void print_usage(FILE *stream)
 {
@@ -45,24 +50,35 @@ int main(int argc, char*argv[]){
         print_usage(stderr);
         exit(ERR_ARGS);
        }
-    password[strlen(password)] = '\0';
-    printf("%ld\n", strlen(password));
+    password[strlen(password)] = '\0'; // retira espaço vazio
     //*************************************************************************************
 
-    //Criacao da conta de administrador
+    //******************Criacao da conta de administrador***************************
     char new_salt[HASH_LEN];
     char passSalted[strlen(password) + HASH_LEN];
+   // char sha256[SHA_LONG];
     passSalted[0] = '\0';
     new_salt[0] = '\0';
+    //sha256[0] = '\0';
 
     createSalt(new_salt);
 
    strcat(passSalted, password);
    strcat(passSalted, new_salt);   //ready to sha256sum
+   
+   //******************************************************************************
+
+
+
+   if(reply_message() != 0){
+       printf("Unable to reply to client");
+   }
+
    //TODO make sha256sum a passSalted
+   
    //TODO dcriar array de contas e abrir conta de admimnostrador
 
-    return 0;
+
 
 
     //****************Server fifo **********************
@@ -83,8 +99,8 @@ int main(int argc, char*argv[]){
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
     //************************************************************
-
-    /*do {
+/*
+    do {
         read(fd,&line, ;
         if (opcode!=0) {
         read(fd,name,MAX_NAME_LEN);

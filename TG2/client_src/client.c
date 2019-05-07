@@ -29,7 +29,7 @@ void print_usage(FILE *stream)
 
 void send_message(tlv_request_t message){
     int fd;
-    printf("Sending msg");
+    printf("Sending msg\n");
 
     if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Failed to open server requests FIFO\n");
@@ -236,9 +236,10 @@ int main(int argc, char *argv[])
 
     //*************************************************
 
-  
 
-    send_message(message_send);
+   // send_message(message_send);
+
+    printf("Aquifunciona\n");
 
    // receive_message(strPid);
 

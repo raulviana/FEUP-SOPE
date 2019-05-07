@@ -25,3 +25,7 @@ void createSalt(char* newSalt){
     }
 }
 
+int isPassOk(char passSalted){
+    return 0;
+}
+
