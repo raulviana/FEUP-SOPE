@@ -247,10 +247,10 @@ int main(int argc, char *argv[]) {
     //*************************************************
 
 
-   // send_message(message_send);
+    send_message(message_send);
 
-
+return 0;
     receive_message(strPid);
 
-    return 0;
+    
 }

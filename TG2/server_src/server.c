@@ -30,12 +30,12 @@ void print_usage(FILE *stream)
 int main(int argc, char*argv[]){
 
     //******************Set Up Server******************************
-  /*  struct account {
+    struct account {
         u_int ID;
         int balance;
         char shar256[HASH_LEN];
     };
-    struct account accounts_array[MAX_BANK_ACCOUNTS]; */
+    struct account accounts_array[MAX_BANK_ACCOUNTS];
 
     //Verify arguments**********************************
     if (argc != 3) {
@@ -61,13 +61,20 @@ int main(int argc, char*argv[]){
     password[strlen(password)] = '\0'; // retira espaço vazio
 
     //******************************************
+    struct account new_account;
+    new_account.ID = ADMIN_ACCOUNT_ID;
+    new_account.balance = 0;
+    strcpy(new_account.shar256, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
+    accounts_array[0] = new_account;
+    printf("%d\n", accounts_array[0].ID);
+    //Conta admnistrador criada
 
-   //TODO abrir conta de admimnostrador
 
     //Server fifo **********************
     int fd, fd_dummy;
-   // char line[MAX_LINE];
-   // line[0] = '\0';
+    int opcode;
+    char line[MAX_LINE];
+    line[0] = '\0';
 
     if (mkfifo(SERVER_FIFO_PATH,0660)<0)
         if (errno==EEXIST) printf("Requests FIFO already exists\n");
@@ -82,16 +89,16 @@ int main(int argc, char*argv[]){
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
     //*************************************
-/*
+
     do {
-        read(fd,&line, ;
-        if (opcode!=0) {
-        read(fd,name,MAX_NAME_LEN);
-        printf("%s has requested operation %d\n",name,opcode);
+        read(fd,&opcode,sizeof(int));
+        if (opcode==0 || opcode==1 || opcode==2 || opcode==3) {
+        read(fd,line,MAX_LINE);
+        //pprocess requests
+        printf(" has requested operation %d\n",opcode);
+        printf("%s\n", line);
         }
-    } while (opcode!=0);*/
-     
-    //Read from FIFO
+    } while (opcode!=3);    //Read from FIFO, if opcode==3 -> close server
 
 
 
@@ -106,7 +113,7 @@ int main(int argc, char*argv[]){
     if (unlink(SERVER_FIFO_PATH) < 0)
         printf("Error when destroying FIFO '/tmp/requests'\n");
     else
-        printf("FIFO '/tmp/requests' has been destroyed\n");
+        printf("Server FIFO has been destroyed\n");
     //*************************************** 
 
 
