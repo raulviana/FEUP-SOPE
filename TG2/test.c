@@ -47,11 +47,13 @@ int main()
 		dup(fd[1]);
 		close(fd[0]);
 		close(fd[1]);
-		argv[0] = (char*) malloc(5*sizeof(char));
-		argv[1] = (char*) malloc(5*sizeof(char));
-		strcpy(argv[0],"ls");
-		strcpy(argv[1],"-l");
-		argv[2] = NULL;
+		argv[0] = (char*) malloc(3*sizeof(char));
+		argv[1] = (char*) malloc(3*sizeof(char));
+		argv[2] = (char*) malloc(9*sizeof(char));
+		strcpy(argv[0],"echo");
+		strcpy(argv[1],"-n");
+		strcpy(argv[2], "password");
+		argv[3] = NULL;
 		fprintf(stderr,"************* Running ls -l *************\n");	
 		execvp(argv[0],argv);
 		perror("First execvp() failed");
@@ -70,11 +72,10 @@ int main()
 		dup(fd[0]);
 		close(fd[0]);
 		close(fd[1]);
-		argv[0] = (char*) malloc(5*sizeof(char));
-		argv[1] = (char*) malloc(5*sizeof(char));
-		strcpy(argv[0],"grep");
-		strcpy(argv[1],"pipe");
-		argv[2] = NULL;
+		argv[0] = (char*) malloc(10*sizeof(char));
+	
+		strcpy(argv[0],"sha256sum");
+		argv[1] = NULL;
 		fprintf(stderr,"************* Running grep pipe *************\n");
 		execvp(argv[0],argv);
 		perror("Second execvp() failed");

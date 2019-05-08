@@ -1,7 +1,6 @@
 
 
 
-int reply_message(){
    /* rep_header_t reply_header;
     rep_balance_t reply_balance;
     rep_transfer_t reply_transfer;
@@ -11,7 +10,3 @@ int reply_message(){
 
 
 
-
-
-    return 0;
-}

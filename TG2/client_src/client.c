@@ -12,6 +12,7 @@
 #include "../types.h"
 #include "../log.c"
 
+
 #define ERR_ARGS 2
 #define ERR_FIFO 3
 #define SERVER_FIFO_ERROR 4
@@ -47,6 +48,7 @@ void send_message(tlv_request_t message){
 }
 
 void alarm_hanlder(){
+    printf(" timeout, no response from server ");
     //TODO write in log
     exit(0);
 }
@@ -55,6 +57,10 @@ void setup_alarm(){
 }
 
 void receive_message(char *strPid){
+
+    int fd, fd_dummy;
+    char line[MAX_LINE_LENGTH];
+    int optype; 
     
     setup_alarm();
     alarm(FIFO_TIMEOUT_SECS);
@@ -62,16 +68,21 @@ void receive_message(char *strPid){
     char fifo_name[USER_FIFO_PATH_LEN] = "\0";
     strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
     strcat(fifo_name, strPid);
-
-    FILE* fifo_response = fopen(fifo_name, "r");
-    if(fifo_response == NULL){
-        printf("Error: Failed to open client fifo for reading.\n");
-        exit(ERR_FIFO);
-    }
+    if ((fd=open(fifo_name,O_RDONLY)) !=-1)
+    printf("Reply FIFO openned in READONLY mode\n");
+    if ((fd_dummy=open(fifo_name,O_WRONLY)) !=-1)
+    printf("Reply FIFO openned in WRITEONLY mode\n");
     
+    do {
+      read(fd,&optype,sizeof(int));
+      if (optype >=0 || optype < 4) {
+        read(fd,line,MAX_LINE_LENGTH);
+ printf("line %s\n",line);
+ }
+ } while (optype!=0);
     tlv_reply_t *message_received;
-    //Read message
-    //Será apenas preciso aceder ao ret_code, como???
+    // reconstruct_message(line, message_received);
+   
     //int log_result = logReply(fifo_response, getpid(), *message_received); 
    
 
@@ -89,8 +100,7 @@ void receive_message(char *strPid){
     strcat(account_final, account_ID);
 }*/
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 
     if (argc != 6)
     {
@@ -204,7 +214,7 @@ int main(int argc, char *argv[])
             header_args.create = createAccount;
         }
     }
-    //createAccount struct is ready
+    //createAccount header struct is ready
 
     if (op_code == OP_TRANSFER)
     {
@@ -227,7 +237,7 @@ int main(int argc, char *argv[])
             header_args.transfer = transfer;
         }
     }
-    // transfer struct ready
+    // transfer header struct ready
 
     message_send.value = header_args;
     message_send.type = op_code;
@@ -239,9 +249,8 @@ int main(int argc, char *argv[])
 
    // send_message(message_send);
 
-    printf("Aquifunciona\n");
 
-   // receive_message(strPid);
+    receive_message(strPid);
 
     return 0;
 }

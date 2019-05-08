@@ -13,14 +13,14 @@
 #include "../types.h"
 #include "../crypto.c"
 
-#include "reply_message.c" 
+#include "communication.c" 
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
 
 #define MAX_LINE 512
-#define SHA_LONG 64
 
+typedef unsigned int u_int;
 
 void print_usage(FILE *stream)
 {
@@ -29,7 +29,15 @@ void print_usage(FILE *stream)
 
 int main(int argc, char*argv[]){
 
-    //***************************Verify arguments**********************************
+    //******************Set Up Server******************************
+  /*  struct account {
+        u_int ID;
+        int balance;
+        char shar256[HASH_LEN];
+    };
+    struct account accounts_array[MAX_BANK_ACCOUNTS]; */
+
+    //Verify arguments**********************************
     if (argc != 3) {
         printf("Wrong number of arguments\n");
             print_usage(stderr);
@@ -49,39 +57,14 @@ int main(int argc, char*argv[]){
         printf("Error: Invalid Password. Must have more than 8 and less than 20 characters.\n");
         print_usage(stderr);
         exit(ERR_ARGS);
-       }
+    }
     password[strlen(password)] = '\0'; // retira espaço vazio
-    //*************************************************************************************
 
-    //******************Criacao da conta de administrador***************************
-    char new_salt[HASH_LEN];
-    char passSalted[strlen(password) + HASH_LEN];
-   // char sha256[SHA_LONG];
-    passSalted[0] = '\0';
-    new_salt[0] = '\0';
-    //sha256[0] = '\0';
+    //******************************************
 
-    createSalt(new_salt);
+   //TODO abrir conta de admimnostrador
 
-   strcat(passSalted, password);
-   strcat(passSalted, new_salt);   //ready to sha256sum
-   
-   //******************************************************************************
-
-
-
-   if(reply_message() != 0){
-       printf("Unable to reply to client");
-   }
-
-   //TODO make sha256sum a passSalted
-   
-   //TODO dcriar array de contas e abrir conta de admimnostrador
-
-
-
-
-    //****************Server fifo **********************
+    //Server fifo **********************
     int fd, fd_dummy;
    // char line[MAX_LINE];
    // line[0] = '\0';
@@ -98,7 +81,7 @@ int main(int argc, char*argv[]){
         printf("Requests FIFO created in READONLY mode\n"); 
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
-    //************************************************************
+    //*************************************
 /*
     do {
         read(fd,&line, ;
@@ -119,14 +102,13 @@ int main(int argc, char*argv[]){
 
     close(fd);
     close(fd_dummy);
-    //*******************Erase FIFO******************************
+    //Erase FIFO******************************
     if (unlink(SERVER_FIFO_PATH) < 0)
         printf("Error when destroying FIFO '/tmp/requests'\n");
     else
         printf("FIFO '/tmp/requests' has been destroyed\n");
-    //********************************************* 
+    //*************************************** 
 
 
     return 0;
-
 }

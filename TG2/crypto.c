@@ -1,8 +1,11 @@
 
 #include <stdlib.h>
 #include <time.h>
+#include <sys/wait.h>
 
 #include "constants.h"
+
+#define MAXLINE 512
 
 
 
@@ -28,4 +31,7 @@ void createSalt(char* newSalt){
 int isPassOk(char passSalted){
     return 0;
 }
+
+
+
 
