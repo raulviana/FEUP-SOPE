@@ -30,7 +30,12 @@ void print_usage(FILE *stream)
 
 void send_message(tlv_request_t message){
     int fd;
-    printf("Sending msg\n");
+   /* printf("msg: %d\n", message.length);
+    printf("msg: %s\n", message.value.header.password);
+
+    printf("msg: %ld\n", strlen(message.value.header.password));
+    printf(" msg: %d\n", message.value.header.account_id);*/
+
 
     if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Failed to open server requests FIFO\n");
@@ -45,6 +50,7 @@ void send_message(tlv_request_t message){
         printf("Error: Failed to send message to server FIFO\n");
         exit(MESSAGE_SENT_ERROR);
     }
+    close(fd);
 }
 
 void alarm_hanlder(){
@@ -113,7 +119,7 @@ int main(int argc, char *argv[]) {
     req_header_t header;
     req_create_account_t createAccount;
     req_transfer_t transfer;
-    req_value_t header_args;
+    req_value_t value;
     tlv_request_t message_send;
 
     //PID
@@ -156,7 +162,7 @@ int main(int argc, char *argv[]) {
     * 2 - Between Accounts Transfer: "destinationAccountID value"
     * 3 - Server ShutDown: no extra arguments
     */
-    u_int op_code = atoi(argv[4]);
+    int op_code = atoi(argv[4]);
     if (op_code < 0 || op_code >= __OP_MAX_NUMBER)
     {
         printf("Invalid Operation Code. Use 0, 1, 2 or 3.\n");
@@ -164,11 +170,6 @@ int main(int argc, char *argv[]) {
         exit(ERR_ARGS);
     }
     //struct header is finished
-
-    if (op_code == OP_BALANCE || op_code == OP_TRANSFER)
-    {
-        header_args.header = header;
-    }
 
     //Operation Arguments
     char op_arguments[MAX_LINE_LENGTH];
@@ -185,61 +186,57 @@ int main(int argc, char *argv[]) {
     }
     //operation arguments list is ready
 
-    if (op_code == OP_CREATE_ACCOUNT)
-    {
 
-        if (atoi(argList[0]) < 1 || atoi(argList[0]) > MAX_BANK_ACCOUNTS)
-        {
+    switch(op_code){
+        case(OP_BALANCE):
+            value.header = header;
+            break;
+        case(OP_SHUTDOWN):
+            value.header = header;
+            break;
+        case(OP_CREATE_ACCOUNT):
+          if (atoi(argList[0]) < 1 || atoi(argList[0]) > MAX_BANK_ACCOUNTS){
             printf("Invalid Destination Account ID. Use: 1 <= Account ID <= 4096\n");
             print_usage(stderr);
             exit(ERR_ARGS);
         }
-        else if (atoi(argList[1]) < MIN_BALANCE || atoi(argList[1]) > MAX_BALANCE)
-        {
+          else if (atoi(argList[1]) < MIN_BALANCE || atoi(argList[1]) > MAX_BALANCE){
             printf("Invalid account balance. Use 1 <= Account Balance <= 1000000000\n");
             print_usage(stderr);
             exit(ERR_ARGS);
         }
-        else if (strlen(argList[2]) < MIN_PASSWORD_LEN || strlen(argList[2]) > MAX_PASSWORD_LEN)
-        {
+          else if (strlen(argList[2]) < MIN_PASSWORD_LEN || strlen(argList[2]) > MAX_PASSWORD_LEN){
             printf("Error: Invalid Password. Must have more than 8 and less than 20 characters.\n");
             print_usage(stderr);
             exit(ERR_ARGS);
         }
-        else
-        {
+          else{
+            value.header = header;
             createAccount.account_id = atoi(argList[0]);
             createAccount.balance = atoi(argList[1]);
             strcpy(createAccount.password, argList[2]);
-            header_args.create = createAccount;
-        }
-    }
-    //createAccount header struct is ready
-
-    if (op_code == OP_TRANSFER)
-    {
-        if (atoi(argList[0]) < 1 || atoi(argList[0]) > MAX_BANK_ACCOUNTS)
-        {
+            value.create = createAccount;
+        }//createAccount header struct is ready
+        case(OP_TRANSFER):
+          if (atoi(argList[0]) < 1 || atoi(argList[0]) > MAX_BANK_ACCOUNTS){
             printf("Invalid Destination Account ID. Use: 1 <= Account ID <= 4096\n");
             print_usage(stderr);
             exit(ERR_ARGS);
-        }
-        else if (atoi(argList[1]) < MIN_BALANCE || atoi(argList[1]) > MAX_BALANCE)
-        {
+          }
+          else if (atoi(argList[1]) < MIN_BALANCE || atoi(argList[1]) > MAX_BALANCE){
             printf("Invalid account balance. Use 1 <= Account Balance <= 1000000000\n");
             print_usage(stderr);
             exit(ERR_ARGS);
-        }
-        else
-        {
+          }
+        else{
+            value.header = header;
             transfer.account_id = atoi(argList[0]);
             transfer.amount = atoi(argList[1]);
-            header_args.transfer = transfer;
-        }
+            value.transfer = transfer;
+        }// transfer header struct ready
     }
-    // transfer header struct ready
 
-    message_send.value = header_args;
+    message_send.value = value;
     message_send.type = op_code;
     message_send.length = sizeof(message_send);
     //message TLV is ready to be sent!

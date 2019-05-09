@@ -1,12 +1,18 @@
 
 
+#define MAX_LINE 512
 
-   /* rep_header_t reply_header;
-    rep_balance_t reply_balance;
-    rep_transfer_t reply_transfer;
-    rep_shutdown_t reply_shutdown;
-    rep_value_t reply_header_plus_value;
-    tlv_reply_t reply_message;*/
+
+
+ void create_message(char line[]){
+    printf("now in createmessage\n");
+   /*int opcode = atoi(&line[0]);
+   uint32_t length = atoi(&line[1]);
+   printf("opcode: %d\n", opcode);
+    printf("length: %d\n", length);
+*/
+}
+
 
 
 

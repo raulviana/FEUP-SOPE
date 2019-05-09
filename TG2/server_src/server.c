@@ -66,7 +66,7 @@ int main(int argc, char*argv[]){
     new_account.balance = 0;
     strcpy(new_account.shar256, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
     accounts_array[0] = new_account;
-    printf("%d\n", accounts_array[0].ID);
+    printf("teste acounts array.ID: %d\n", accounts_array[0].ID);
     //Conta admnistrador criada
 
 
@@ -91,15 +91,19 @@ int main(int argc, char*argv[]){
     //*************************************
 
     do {
-        read(fd,&opcode,sizeof(int));
+        //read(fd,&opcode,sizeof(int));
+        
+        read(fd,&line,MAX_LINE);
+        opcode = line[0];
         if (opcode==0 || opcode==1 || opcode==2 || opcode==3) {
-        read(fd,line,MAX_LINE);
-        //pprocess requests
-        printf(" has requested operation %d\n",opcode);
-        printf("%s\n", line);
+        //process requests
+        int length = line[1];
+        printf("length: %d", length);
         }
+        //****************
+        printf(" has requested operation %d\n",opcode);
+        
     } while (opcode!=3);    //Read from FIFO, if opcode==3 -> close server
-
 
 
 
