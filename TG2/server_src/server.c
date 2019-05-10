@@ -104,8 +104,8 @@ int type = 0;
         count ++;
     }
     str[count] = '\0'; //string ready 
-    tlv_request_t request;
-    makeTlv(request);
+   // tlv_request_t request;
+   // makeTlv(request);
    
 
 
