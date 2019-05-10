@@ -27,6 +27,10 @@ void print_usage(FILE *stream)
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
 }
 
+void makeTlv(request){
+    
+}
+
 int main(int argc, char*argv[]){
 
     //******************Set Up Server******************************
@@ -72,9 +76,6 @@ int main(int argc, char*argv[]){
 
     //Server fifo **********************
     int fd, fd_dummy;
-    int opcode;
-    char line[MAX_LINE];
-    line[0] = '\0';
 
     if (mkfifo(SERVER_FIFO_PATH,0660)<0)
         if (errno==EEXIST) printf("Requests FIFO already exists\n");
@@ -89,21 +90,28 @@ int main(int argc, char*argv[]){
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
     //*************************************
+int type = 0;
+  do { 
+    int numread;
+    char buf [ MAX_LINE ];
+    numread = read (fd , buf , MAX_LINE );
+    buf [ MAX_LINE ]= '\0';
+    int count=0;
+    char str[numread];
+    printf ( " Converted String : " ); 
+    while ( count < numread ){
+        str [ count ]=  buf[count];
+        count ++;
+    }
+    str[count] = '\0'; //string ready 
+    tlv_request_t request;
+    makeTlv(request);
+   
 
-    do {
-        //read(fd,&opcode,sizeof(int));
-        
-        read(fd,&line,MAX_LINE);
-        opcode = line[0];
-        if (opcode==0 || opcode==1 || opcode==2 || opcode==3) {
-        //process requests
-        int length = line[1];
-        printf("length: %d", length);
-        }
-        //****************
-        printf(" has requested operation %d\n",opcode);
-        
-    } while (opcode!=3);    //Read from FIFO, if opcode==3 -> close server
+
+
+
+ } while (type!=3);
 
 
 

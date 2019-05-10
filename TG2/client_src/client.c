@@ -28,16 +28,26 @@ void print_usage(FILE *stream)
     fprintf(stream, "Usage: ./client <Account ID> <\"Password\"> <Operation Delay (ms)> <Operation Code> <\"Operation Arguments\">\n");
 }
 
-void send_message(tlv_request_t message){
+void *send_message (tlv_request_t message_send){
     int fd;
-   /* printf("msg: %d\n", message.length);
-    printf("msg: %s\n", message.value.header.password);
+   
+   char tempstr[MAX_LINE_LENGTH];
+   printf("sizeof: %ld\n", sizeof(message_send));
+   message_send.length = sizeof(message_send);
+   printf("sizeof: %d\n", message_send.length);
+   size_t len = snprintf(tempstr, MAX_LINE_LENGTH, "%d,%d,%d,%d,%s",
+                        message_send.type, message_send.length, message_send.value.header.account_id,
+                        message_send.value.header.op_delay_ms, message_send.value.header.password);
+    message_send.length = len;
 
-    printf("msg: %ld\n", strlen(message.value.header.password));
-    printf(" msg: %d\n", message.value.header.account_id);*/
+    snprintf(tempstr, MAX_LINE_LENGTH, "%d,%d,%d,%d,%s",
+                        message_send.type, message_send.length, message_send.value.header.account_id,
+                        message_send.value.header.op_delay_ms, message_send.value.header.password);
+    tempstr[len] = '\0';
+     char* str = calloc(1, sizeof *str * len +1);
+     strcpy(str, tempstr);
 
-
-    if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
+     if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Failed to open server requests FIFO\n");
         exit(SERVER_FIFO_ERROR);
     } 
@@ -45,7 +55,7 @@ void send_message(tlv_request_t message){
         printf("Open Successfully");
     }
 
-    int write_result = write(fd, &message, sizeof(message));
+    int write_result = write(fd, str, message_send.length);
     if (write_result < 0){
         printf("Error: Failed to send message to server FIFO\n");
         exit(MESSAGE_SENT_ERROR);
@@ -62,7 +72,7 @@ void setup_alarm(){
     signal(SIGALRM, alarm_hanlder);
 }
 
-void receive_message(char *strPid){
+/*void receive_message(char *strPid){
 
     int fd, fd_dummy;
     char line[MAX_LINE_LENGTH];
@@ -93,8 +103,7 @@ void receive_message(char *strPid){
    
 
 
-}
-
+}*/
 
 
 /*void setWidth(char *arg[], int width){
@@ -246,8 +255,8 @@ int main(int argc, char *argv[]) {
 
     send_message(message_send);
 
-return 0;
-    receive_message(strPid);
+  //  receive_message(strPid);
 
+return 0;
     
 }
