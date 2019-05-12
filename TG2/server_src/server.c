@@ -8,6 +8,7 @@
 #include <limits.h>
 #include <errno.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "../constants.h"
 #include "../types.h"
@@ -27,9 +28,9 @@ void print_usage(FILE *stream)
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
 }
 
-void makeTlv(request){
+/*void makeTlv(request){
     
-}
+}*/
 
 int main(int argc, char*argv[]){
 
@@ -70,7 +71,7 @@ int main(int argc, char*argv[]){
     new_account.balance = 0;
     strcpy(new_account.shar256, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
     accounts_array[0] = new_account;
-    printf("teste acounts array.ID: %d\n", accounts_array[0].ID);
+    printf("ccountIDadmin: %d\n", accounts_array[0].ID);
     //Conta admnistrador criada
 
 
@@ -90,28 +91,39 @@ int main(int argc, char*argv[]){
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
     //*************************************
-int type = 0;
+//char final [MAX_LINE];
+int numread;
+char buf[MAX_LINE];
+int length;
+char str[MAX_LINE];
+int  opcode;
+
+
   do { 
-    int numread;
-    char buf [ MAX_LINE ];
-    numread = read (fd , buf , MAX_LINE );
-    buf [ MAX_LINE ]= '\0';
-    int count=0;
-    char str[numread];
-    printf ( " Converted String : " ); 
-    while ( count < numread ){
-        str [ count ]=  buf[count];
-        count ++;
-    }
-    str[count] = '\0'; //string ready 
-   // tlv_request_t request;
-   // makeTlv(request);
-   
 
+ numread = read (fd , buf , 1);
+buf [ numread ]= '\0';
+printf ( " Read from the pipe : %s\n" , buf );
+opcode = atoi(buf);
+printf("opcode: %d\n", opcode);
+buf[0] = 0;
 
+ numread = read (fd , buf , 2);
+ buf [ numread ]= '\0';
+ printf ( " Read from the pipe : %s\n" , buf );
+ length = atoi(buf);
+ printf("length: %d\n", length);
+ buf[0] = 0;
 
+numread = read (fd , buf , length);
+ buf [ numread ]= '\0';
+ printf ( " Read from the pipe : %s\n" , buf );
+ strcpy(str, buf);
+ printf("str: %s\n", str);
 
- } while (type!=3);
+buf[0] = '\0';
+numread = 0;
+ }while (1);
 
 
 

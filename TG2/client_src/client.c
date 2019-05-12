@@ -29,25 +29,41 @@ void print_usage(FILE *stream)
 }
 
 void *send_message (tlv_request_t message_send){
-    int fd;
    
    char tempstr[MAX_LINE_LENGTH];
-   printf("sizeof: %ld\n", sizeof(message_send));
    message_send.length = sizeof(message_send);
-   printf("sizeof: %d\n", message_send.length);
-   size_t len = snprintf(tempstr, MAX_LINE_LENGTH, "%d,%d,%d,%d,%s",
-                        message_send.type, message_send.length, message_send.value.header.account_id,
-                        message_send.value.header.op_delay_ms, message_send.value.header.password);
+   size_t len;
+
+   if(message_send.type == OP_BALANCE || message_send.type == OP_SHUTDOWN){
+       len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|",
+                        message_send.type, message_send.length, message_send.value.header.pid,
+                        message_send.value.header.account_id,message_send.value.header.password,
+                        message_send.value.header.op_delay_ms);
+    }
+    else{
+        if(message_send.type == OP_CREATE_ACCOUNT){
+            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|%d|%d|%s",
+                        message_send.type, message_send.length, message_send.value.header.pid,
+                        message_send.value.header.account_id,message_send.value.header.password,
+                        message_send.value.header.op_delay_ms, message_send.value.create.account_id,
+                        message_send.value.create.balance, message_send.value.create.password);
+        }
+        else{
+            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|%d|%d",
+                        message_send.type, message_send.length, message_send.value.header.pid,
+                        message_send.value.header.account_id,message_send.value.header.password,
+                        message_send.value.header.op_delay_ms, message_send.value.transfer.account_id,
+                        message_send.value.transfer.amount);
+        }
+    }
+    
     message_send.length = len;
 
-    snprintf(tempstr, MAX_LINE_LENGTH, "%d,%d,%d,%d,%s",
-                        message_send.type, message_send.length, message_send.value.header.account_id,
-                        message_send.value.header.op_delay_ms, message_send.value.header.password);
     tempstr[len] = '\0';
-     char* str = calloc(1, sizeof *str * len +1);
-     strcpy(str, tempstr);
-
-     if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
+    char* str = calloc(1, sizeof *str * len +1);
+    strcpy(str, tempstr);
+    int fd;
+    if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Failed to open server requests FIFO\n");
         exit(SERVER_FIFO_ERROR);
     } 
@@ -106,15 +122,6 @@ void setup_alarm(){
 }*/
 
 
-/*void setWidth(char *arg[], int width){
-    
-    strcat(account_ID, argv[1]);
-    while((strlen(account_final) + strlen(account_ID)) <= WIDTH_ACCOUNT - 1){
-        strcat(account_final, "0");
-    }
-    strcat(account_final, account_ID);
-}*/
-
 int main(int argc, char *argv[]) {
 
     if (argc != 6)
@@ -126,9 +133,9 @@ int main(int argc, char *argv[]) {
     //************Prepare arguments*******************
 
     req_header_t header;
+    req_value_t value;
     req_create_account_t createAccount;
     req_transfer_t transfer;
-    req_value_t value;
     tlv_request_t message_send;
 
     //PID
