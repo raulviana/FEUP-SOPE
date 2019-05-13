@@ -35,21 +35,21 @@ void *send_message (tlv_request_t message_send){
    size_t len;
 
    if(message_send.type == OP_BALANCE || message_send.type == OP_SHUTDOWN){
-       len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|",
+       len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d|%d|%s|%d|",
                         message_send.type, message_send.length, message_send.value.header.pid,
                         message_send.value.header.account_id,message_send.value.header.password,
                         message_send.value.header.op_delay_ms);
     }
     else{
         if(message_send.type == OP_CREATE_ACCOUNT){
-            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|%d|%d|%s",
+            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d|%d|%s|%d|%d|%d|%s",
                         message_send.type, message_send.length, message_send.value.header.pid,
                         message_send.value.header.account_id,message_send.value.header.password,
                         message_send.value.header.op_delay_ms, message_send.value.create.account_id,
                         message_send.value.create.balance, message_send.value.create.password);
         }
         else{
-            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d%d|%s|%d|%d|%d",
+            len = snprintf(tempstr, MAX_LINE_LENGTH, "%d%d%d|%d|%s|%d|%d|%d",
                         message_send.type, message_send.length, message_send.value.header.pid,
                         message_send.value.header.account_id,message_send.value.header.password,
                         message_send.value.header.op_delay_ms, message_send.value.transfer.account_id,

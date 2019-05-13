@@ -23,6 +23,7 @@
 #define ERR_FIFO 2
 
 #define MAX_LINE 512
+#define MAX_ARGUMENTS 7
 
 typedef unsigned int u_int;
 int num_eletronic_counter;
@@ -35,10 +36,50 @@ void print_usage(FILE *stream)
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
 }
 
-/*void makeTlv(request){
-    
-}*/
 
+void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
+    printf("str: %s\n", str);
+    char list[MAX_ARGUMENTS][MAX_LINE];
+    int count = 0;
+    char delim[] = "|";
+	char *ptr = strtok(str, delim);
+
+	while(ptr != NULL){
+		strcpy(list[count], ptr);
+		ptr = strtok(NULL, delim);
+        count++;
+	}
+
+    request.type = opcode;
+    request.length = length;
+    request.value.header.pid = atoi(list[0]);
+    request.value.header.account_id = atoi(list[1]);
+    strcpy(request.value.header.password, list[2]);
+    request.value.header.op_delay_ms = atoi(list[3]);
+
+    if(request.type == OP_CREATE_ACCOUNT){
+        request.value.create.account_id = atoi(list[4]);
+        request.value.create.balance = atoi(list[5]);
+        strcpy(request.value.create.password, list[6]);
+    }
+    if(request.type == OP_TRANSFER) {
+        request.value.transfer.account_id = atoi(list[4]);
+        request.value.transfer.amount = atoi(list[5]);
+    }
+
+
+
+
+    printf("%d,  %d,  %d,  %d, %s,  %d,  %d,  %d\n", 
+    request.type,
+    request.length,
+    request.value.header.pid,
+    request.value.header.account_id,
+    request.value.header.password,
+    request.value.header.op_delay_ms, 
+    request.value.transfer.account_id,
+    request.value.transfer.amount);  
+}
 
 void shutdown(){
   /*  int t;
@@ -92,8 +133,8 @@ int main(int argc, char*argv[]){
     printf("ccountIDadmin: %d\n", accounts_array[0].ID);
     //Conta admnistrador criada
 
-    open_slog_file();
-    open_ulog_file();
+    //open_slog_file(); //**Só comentei para poder correr..
+    //open_ulog_file();
 
     //Server fifo **********************
     int fd, fd_dummy;
@@ -111,54 +152,46 @@ int main(int argc, char*argv[]){
     if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
         printf("Request FIFO openned in WRITEONLY mode\n");
     //*************************************
-//char final [MAX_LINE];
+
 int numread;
 char buf[MAX_LINE];
 int length;
 char str[MAX_LINE];
 int  opcode;
+tlv_request_t request;
 
+do { 
 
-  do { 
-
- numread = read (fd , buf , 1);
+numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
-printf ( " Read from the pipe : %s\n" , buf );
-opcode = atoi(buf);
-printf("opcode: %d\n", opcode);
+opcode = atoi(buf);               //preenche opcode
 buf[0] = 0;
 
- numread = read (fd , buf , 2);
- buf [ numread ]= '\0';
- printf ( " Read from the pipe : %s\n" , buf );
- length = atoi(buf);
- printf("length: %d\n", length);
- buf[0] = 0;
+numread = read (fd , buf , 2);
+buf [ numread ]= '\0';
+length = atoi(buf);             //preenche length, para saber quanto ler no proximo read
+buf[0] = 0;
 
 numread = read (fd , buf , length);
- buf [ numread ]= '\0';
- printf ( " Read from the pipe : %s\n" , buf );
- strcpy(str, buf);
- printf("str: %s\n", str);
+buf [ numread ]= '\0';
+strcpy(str, buf);               //str contém o resto da mensagem
 
+remakeTLV(opcode, length, str, request);    //re-constroi a mensagem TLV
+//TODO colocar mensagem num thread e ir à conta correspondente
 buf[0] = '\0';
 numread = 0;
- }while (1);
+if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
+}while (1);
 
 
-
-
-
-
-
-    close(fd);
-    close(fd_dummy);
-    //Erase FIFO******************************
-    if (unlink(SERVER_FIFO_PATH) < 0)
-        printf("Error when destroying FIFO '/tmp/requests'\n");
-    else
-        printf("Server FIFO has been destroyed\n");
-    //*************************************** 
+close(fd);
+close(fd_dummy);
+//Erase FIFO******************************
+if (unlink(SERVER_FIFO_PATH) < 0)
+    printf("Error when destroying FIFO '/tmp/requests'\n");
+else
+    printf("Server FIFO has been destroyed\n");
+//*************************************** 
 /*
     spthread_t request;
 
@@ -167,7 +200,7 @@ numread = 0;
         exit(5);
 }*/
 
-close_slog_file();
-close_ulog_file();
+//close_slog_file();
+//close_ulog_file();
     return 0;
 }
