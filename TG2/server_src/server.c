@@ -9,10 +9,13 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <semaphore.h>
 
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
+#include "slog.h"
+#include "ulog.h"
 
 #include "communication.c" 
 
@@ -22,6 +25,10 @@
 #define MAX_LINE 512
 
 typedef unsigned int u_int;
+int num_eletronic_counter;
+
+sem_t *sem1, *sem2;
+pthread_t *threads;
 
 void print_usage(FILE *stream)
 {
@@ -31,6 +38,17 @@ void print_usage(FILE *stream)
 /*void makeTlv(request){
     
 }*/
+
+
+void shutdown(){
+  /*  int t;
+    for (t = 0; t < num_eletronic_counter; t++) {
+        pthread_join(threads[t], NULL);
+    }
+    sem_close(sem1);
+    sem_close(sem2);*/
+    exit(0);
+}
 
 int main(int argc, char*argv[]){
 
@@ -49,7 +67,7 @@ int main(int argc, char*argv[]){
         exit(ERR_ARGS);
     }
     
-    int num_eletronic_counter = atoi(argv[1]);
+    num_eletronic_counter = atoi(argv[1]);
     if(num_eletronic_counter >  MAX_BANK_OFFICES  || num_eletronic_counter <= 0) {
         fprintf(stderr, "Invalid Number of Eletronic Counters, must be between 1 and 99\n");
         print_usage(stderr);
@@ -74,6 +92,8 @@ int main(int argc, char*argv[]){
     printf("ccountIDadmin: %d\n", accounts_array[0].ID);
     //Conta admnistrador criada
 
+    open_slog_file();
+    open_ulog_file();
 
     //Server fifo **********************
     int fd, fd_dummy;
@@ -139,7 +159,15 @@ numread = 0;
     else
         printf("Server FIFO has been destroyed\n");
     //*************************************** 
+/*
+    spthread_t request;
 
+    if(pthread_screate(&request, NULL, NULL, NULL) != 0){
+        perror("Error creating request threads\n");
+        exit(5);
+}*/
 
+close_slog_file();
+close_ulog_file();
     return 0;
 }
