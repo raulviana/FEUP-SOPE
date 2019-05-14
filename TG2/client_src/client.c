@@ -145,9 +145,9 @@ int main(int argc, char *argv[]) {
 
     //Account ID
     u_int account_number = atoi(argv[1]);
-    if (account_number < 1 || account_number > MAX_BANK_ACCOUNTS)
+    if (account_number < 0 || account_number > MAX_BANK_ACCOUNTS)
     {
-        printf("Error: Invalid Account Number. Use: 1 < Account Number < 4096\n");
+        printf("Error: Invalid Account Number. Use: 0 < Account Number < 4096\n");
         print_usage(stderr);
         exit(ERR_ARGS);
     }

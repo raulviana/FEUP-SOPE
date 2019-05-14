@@ -14,22 +14,22 @@
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
-
-#include "communication.c" 
+#include "../operations.c" 
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
 
 #define MAX_LINE 512
 #define MAX_ARGUMENTS 7
+#define ADMIN_BALANCE 0
 
-typedef unsigned int u_int;
 int num_eletronic_counter;
 
 sem_t *sem1, *sem2;
 pthread_t *threads;
 pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
 tlv_request_t request;
+bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
 
 void print_usage(FILE *stream)
 {
@@ -91,8 +91,7 @@ char getSha256(char* nameFilePtr, char sha256result[]){
         }
 }
 
-void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
-    printf("str: %s\n", str);
+tlv_request_t remakeTLV(int opcode, int length, char str[], tlv_request_t request){
     char list[MAX_ARGUMENTS][MAX_LINE];
     int count = 0;
     char delim[] = "|";
@@ -120,6 +119,7 @@ void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
         request.value.transfer.account_id = atoi(list[4]);
         request.value.transfer.amount = atoi(list[5]);
     } 
+    return request;
 }
 
 void shutdown(){
@@ -131,6 +131,7 @@ void shutdown(){
     sem_close(sem2);*/
     exit(0);
 }
+
 void *wRequest(void *n) {
     
    // char mess[50];
@@ -142,6 +143,8 @@ void *wRequest(void *n) {
     usleep(request.value.header.op_delay_ms * 1000);
     
     printf("Thread");
+   
+    
 
     pthread_mutex_unlock(&mutexI);
 
@@ -154,7 +157,7 @@ void *wRequest(void *n) {
 int main(int argc, char*argv[]){
 
     //******************Set Up Server******************************
-    bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
+    
 
     //Verify arguments**********************************
     if (argc != 3) {
@@ -182,17 +185,12 @@ int main(int argc, char*argv[]){
     //******************************************
     bank_account_t new_account;
     new_account.account_id = ADMIN_ACCOUNT_ID;
-    new_account.balance = 0;
+    new_account.balance = ADMIN_BALANCE;
     char newSalt[SALT_LEN + 1];
     createSalt(newSalt);
     strcpy(new_account.salt, newSalt);
     strcpy(new_account.hash, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
     accounts_array[ADMIN_ACCOUNT_ID] = new_account;
-
-    printf("ccountIDadmin: %d\n", accounts_array[0].account_id);
-    printf("ccountbalance: %d\n", accounts_array[0].balance);
-    printf("ccountsalt: %s\n", accounts_array[0].salt);
-    printf("ccountpass: %s\n", accounts_array[0].hash);
     //Conta admnistrador criada
 
     //open_slog_file(); //**Só comentei para poder correr..
@@ -236,14 +234,17 @@ numread = read (fd , buf , length);
 buf [ numread ]= '\0';
 strcpy(str, buf);               //str contém o resto da mensagem
 
-remakeTLV(opcode, length, str, request);    //re-constroi a mensagem TLV
+request = remakeTLV(opcode, length, str, request);    //re-constroi a mensagem TLV
 //TODO colocar mensagem num thread e ir à conta correspondente
-
+if (request.type== OP_TRANSFER) transferAccount( request, &accounts_array[MAIN_THREAD_ID]);
+if(request.type == OP_BALANCE) balanceAccount( request, &accounts_array[MAIN_THREAD_ID]);
+if(request.type == OP_CREATE_ACCOUNT) createAccount( request, &accounts_array[MAIN_THREAD_ID]);
 
 buf[0] = '\0';
 numread = 0;
 if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
 }while (1);
+
 
 
 close(fd);
