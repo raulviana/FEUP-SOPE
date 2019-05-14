@@ -2,7 +2,64 @@
 
 #include "types.h"
 
+#define MAX_LEN_PID 5
+#define MAX_LINE 512
 
+void sendMessage(int pid, tlv_reply_t tlv_reply){
+
+    char strPid[MAX_LEN_PID];
+    sprintf(strPid, "%d", pid);
+    char FIFO_reply_name[USER_FIFO_PATH_LEN];
+    strcpy(FIFO_reply_name, USER_FIFO_PATH_PREFIX);
+    strcat(FIFO_reply_name, strPid);
+    printf("FIFOname: %s\n", FIFO_reply_name);
+    
+
+    tlv_reply.length = sizeof(tlv_reply);
+    size_t len;
+    char strReply[MAX_LINE];
+        len = sprintf(strReply, "%d%d|%d|%d", 
+            tlv_reply.length,
+            tlv_reply.type, 
+            tlv_reply.value.header.account_id, 
+            tlv_reply.value.header.ret_code);
+    
+    int code = tlv_reply.type;
+    if(tlv_reply.type != 0){
+      switch (code){
+        case OP_BALANCE:
+            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+                tlv_reply.length,
+                tlv_reply.type, 
+                tlv_reply.value.header.account_id, 
+                tlv_reply.value.header.ret_code, 
+                tlv_reply.value.balance.balance);
+            break;
+        case OP_TRANSFER:
+            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+                tlv_reply.length,
+                tlv_reply.type, 
+                tlv_reply.value.header.account_id, 
+                tlv_reply.value.header.ret_code, 
+                tlv_reply.value.transfer.balance);
+            break;
+        case OP_SHUTDOWN:
+            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+                tlv_reply.length,
+                tlv_reply.type, 
+                tlv_reply.value.header.account_id, 
+                tlv_reply.value.header.ret_code, 
+                tlv_reply.value.shutdown.active_offices);
+            break;
+      }
+    }
+ printf("length: %ld\n", len);
+    printf("strReply: %s\n", strReply);
+    strReply[len] = '\0';
+    char* str = calloc(1, sizeof *str * len +1);
+    strcpy(str, strReply);
+printf("str: %s\n", str);
+}
 
 
 void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
@@ -24,9 +81,7 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
     if(accounts_array[request.value.create.account_id].account_id != 0)
          tlv_reply.value.header.ret_code =RC_ID_IN_USE;
 
-printf("replybalance: %d\n", tlv_reply.value.header.account_id);
-
-    ////create and send message
+    sendMessage(request.value.header.pid, tlv_reply);
 }
 
 void transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
@@ -52,9 +107,7 @@ void transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_T
     if(accounts_array[request.value.transfer.account_id].balance > MAX_BALANCE)
         tlv_reply.value.header.ret_code = RC_TOO_HIGH;
 
-printf("balance: %d\n", tlv_reply.value.header.ret_code );
-
-        //create and send message
+    sendMessage(request.value.header.pid, tlv_reply);
 }
 
 void balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
@@ -65,7 +118,5 @@ void balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_TH
     tlv_reply.value.header.ret_code = RC_OK;
     tlv_reply.value.balance.balance = accounts_array[request.value.header.account_id].balance;
 
-    printf("replybalance: %d\n", tlv_reply.value.balance.balance );
-
-    //create and send message
+    sendMessage(request.value.header.pid, tlv_reply);
 }

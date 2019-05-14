@@ -14,14 +14,8 @@
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
-<<<<<<< HEAD
-#include "../operations.c" 
-=======
-#include "../log.c"
-
-
-#include "communication.c" 
->>>>>>> a6db34b572c0f47b1b06e84ff1eebc08b4cda105
+#include "../operations.c"
+#include "../log.c" 
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
@@ -31,23 +25,19 @@
 #define ADMIN_BALANCE 0
 
 int num_eletronic_counter;
+int slog;
 
 sem_t *sem1, *sem2;
 pthread_t *threads;
 pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
 tlv_request_t request;
-<<<<<<< HEAD
 bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
-=======
-int slog;
->>>>>>> a6db34b572c0f47b1b06e84ff1eebc08b4cda105
 
 void print_usage(FILE *stream)
 {
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
 }
-
-<<<<<<< HEAD
+/*
 char getSha256(char* nameFilePtr, char sha256result[]){
         char* filePathPtr = "/usr/bin/sha256sum";
 
@@ -101,13 +91,9 @@ char getSha256(char* nameFilePtr, char sha256result[]){
                 close(fd2[1]);
                 exit(0);
         }
-}
+}*/
 
 tlv_request_t remakeTLV(int opcode, int length, char str[], tlv_request_t request){
-=======
-void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
-    printf("str: %s\n", str);
->>>>>>> a6db34b572c0f47b1b06e84ff1eebc08b4cda105
     char list[MAX_ARGUMENTS][MAX_LINE];
     int count = 0;
     char delim[] = "|";
