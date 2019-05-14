@@ -14,6 +14,8 @@
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
+#include "../log.c"
+
 
 #include "communication.c" 
 
@@ -30,6 +32,7 @@ sem_t *sem1, *sem2;
 pthread_t *threads;
 pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
 tlv_request_t request;
+int slog;
 
 void print_usage(FILE *stream)
 {
@@ -133,18 +136,32 @@ void shutdown(){
 }
 void *wRequest(void *n) {
     
-   // char mess[50];
-
-    //sem_wait(&sem2);
-
-    pthread_mutex_lock(&mutexI);
+    char mess[50];
+    //tlv_request_t req;
 
     usleep(request.value.header.op_delay_ms * 1000);
+    //sprintf(mess, *(int *) n);
+    write(slog, mess, strlen(mess) );
+    //sem_wait(&sem2);
+    while(1){
+    pthread_mutex_lock(&mutexI);
+    if (sem_trywait(sem2) == -1){
+        if (errno == EAGAIN){
+            pthread_mutex_unlock(&mutexI);
+            continue;
+        }
+    }
+
+    //req = request;
+    sem_post(sem1);
+    pthread_mutex_unlock(&mutexI); 
     
     printf("Thread");
 
     pthread_mutex_unlock(&mutexI);
 
+    //TESTING
+    }
     //logReply(STDOUT_FILENO, *(int *)n, &request);
 
     //logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
@@ -259,7 +276,7 @@ else
     threads = temp;
     int threads_num[num_eletronic_counter];
 
-    int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
+     slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
 
     if(slog < 0){
         fprintf(stderr, "Error opening server log file.\n");
@@ -275,6 +292,17 @@ else
     for (int i = 1; i <= num_eletronic_counter; i++) {
         threads_num[i-1] = i;
         pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
+    }
+
+    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
+    //printf(syncM);
+    pthread_mutex_lock(&mutexI);
+    logDelay(STDOUT_FILENO, MAIN_THREAD_ID, 0);
+
+    pthread_mutex_unlock(&mutexI);
+
+    for(int i = 0; i < num_eletronic_counter; i++){
+        pthread_join(temp[i],NULL);
     }
 
 
