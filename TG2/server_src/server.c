@@ -139,24 +139,23 @@ void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
 }
 
 void shutdown(){
-  /*  int t;
-    for (t = 0; t < num_eletronic_counter; t++) {
-        pthread_join(threads[t], NULL);
-    }
-    sem_close(sem1);
-    sem_close(sem2);*/
-    exit(0);
-}
+ 
+    chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
 
+    pthread_mutex_destroy(&mutexI);
+    sem_close(sem1);
+    sem_close(sem2);
+}
 void *wRequest(void *n) {
     
     char mess[50];
-    //tlv_request_t req;
-
+   
     usleep(request.value.header.op_delay_ms * 1000);
-    //sprintf(mess, *(int *) n);
+
+    sprintf(mess, "-OPEN%i\n", *(int *) n);
     write(slog, mess, strlen(mess) );
-    //sem_wait(&sem2);
+   
+    sem_wait(sem2);
     while(1){
     pthread_mutex_lock(&mutexI);
     if (sem_trywait(sem2) == -1){
@@ -165,19 +164,52 @@ void *wRequest(void *n) {
             continue;
         }
     }
-
-    //req = request;
-    sem_post(sem1);
+    
     pthread_mutex_unlock(&mutexI); 
     
-    printf("Thread");
-   
-    
+    switch(request.type){
 
-    pthread_mutex_unlock(&mutexI);
+        //Criação de Conta
+        case OP_CREATE_ACCOUNT:
+            pthread_mutex_lock(&mutexI);
+            //
+            //logAccountCreation(int fd, int id, const bank_account_t *account);
+            //
+            pthread_mutex_unlock(&mutexI);
+            break;
 
-    //TESTING
+        //Consulta de Saldo
+        case OP_BALANCE:
+            pthread_mutex_lock(&mutexI);
+            //....
+            pthread_mutex_unlock(&mutexI);
+            break;
+        //Transferência
+        case OP_TRANSFER:
+
+            break;
+
+        //Encerramentodo Servidor
+        case OP_SHUTDOWN:
+            shutdown();
+            break;
+        default:
+            break;
+
     }
+
+    
+    pthread_mutex_unlock(&mutexI); 
+    
+    //printf("Thread");
+
+   
+    }
+    sprintf(mess, "CLOSE: %i\n", *(int *) n);
+    write(slog, mess, strlen(mess));
+
+
+    sem_post(sem1);
     //logReply(STDOUT_FILENO, *(int *)n, &request);
 
     //logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
