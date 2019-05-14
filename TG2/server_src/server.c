@@ -119,20 +119,7 @@ void remakeTLV(int opcode, int length, char str[], tlv_request_t request){
     if(request.type == OP_TRANSFER) {
         request.value.transfer.account_id = atoi(list[4]);
         request.value.transfer.amount = atoi(list[5]);
-    }
-
-
-
-
-    printf("%d,  %d,  %d,  %d, %s,  %d,  %d,  %d\n", 
-    request.type,
-    request.length,
-    request.value.header.pid,
-    request.value.header.account_id,
-    request.value.header.password,
-    request.value.header.op_delay_ms, 
-    request.value.transfer.account_id,
-    request.value.transfer.amount);  
+    } 
 }
 
 void shutdown(){
@@ -153,6 +140,7 @@ void *wRequest(void *n) {
     pthread_mutex_lock(&mutexI);
 
     usleep(request.value.header.op_delay_ms * 1000);
+    
     printf("Thread");
 
     pthread_mutex_unlock(&mutexI);
@@ -166,12 +154,7 @@ void *wRequest(void *n) {
 int main(int argc, char*argv[]){
 
     //******************Set Up Server******************************
-    struct account {
-        u_int ID;
-        int balance;
-        char shar256[HASH_LEN];
-    };
-    struct account accounts_array[MAX_BANK_ACCOUNTS];
+    bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
 
     //Verify arguments**********************************
     if (argc != 3) {
@@ -197,12 +180,19 @@ int main(int argc, char*argv[]){
     password[strlen(password)] = '\0'; // retira espaço vazio
 
     //******************************************
-    struct account new_account;
-    new_account.ID = ADMIN_ACCOUNT_ID;
+    bank_account_t new_account;
+    new_account.account_id = ADMIN_ACCOUNT_ID;
     new_account.balance = 0;
-    strcpy(new_account.shar256, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
-    accounts_array[0] = new_account;
-    printf("ccountIDadmin: %d\n", accounts_array[0].ID);
+    char newSalt[SALT_LEN + 1];
+    createSalt(newSalt);
+    strcpy(new_account.salt, newSalt);
+    strcpy(new_account.hash, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
+    accounts_array[ADMIN_ACCOUNT_ID] = new_account;
+
+    printf("ccountIDadmin: %d\n", accounts_array[0].account_id);
+    printf("ccountbalance: %d\n", accounts_array[0].balance);
+    printf("ccountsalt: %s\n", accounts_array[0].salt);
+    printf("ccountpass: %s\n", accounts_array[0].hash);
     //Conta admnistrador criada
 
     //open_slog_file(); //**Só comentei para poder correr..
@@ -231,9 +221,7 @@ int length;
 char str[MAX_LINE];
 int  opcode;
 
-
-do { 
-
+do {
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
 opcode = atoi(buf);               //preenche opcode
@@ -250,6 +238,8 @@ strcpy(str, buf);               //str contém o resto da mensagem
 
 remakeTLV(opcode, length, str, request);    //re-constroi a mensagem TLV
 //TODO colocar mensagem num thread e ir à conta correspondente
+
+
 buf[0] = '\0';
 numread = 0;
 if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
