@@ -14,8 +14,6 @@
 #include "../constants.h"
 #include "../types.h"
 #include "../crypto.c"
-#include "slog.h"
-#include "ulog.h"
 
 #include "communication.c" 
 
@@ -30,6 +28,8 @@ int num_eletronic_counter;
 
 sem_t *sem1, *sem2;
 pthread_t *threads;
+pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
+tlv_request_t request;
 
 void print_usage(FILE *stream)
 {
@@ -89,6 +89,24 @@ void shutdown(){
     sem_close(sem1);
     sem_close(sem2);*/
     exit(0);
+}
+void *wRequest(void *n) {
+    
+   // char mess[50];
+
+    //sem_wait(&sem2);
+
+    pthread_mutex_lock(&mutexI);
+
+    usleep(request.value.header.op_delay_ms * 1000);
+    printf("Thread");
+
+    pthread_mutex_unlock(&mutexI);
+
+    //logReply(STDOUT_FILENO, *(int *)n, &request);
+
+    //logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
+    pthread_exit(NULL);
 }
 
 int main(int argc, char*argv[]){
@@ -158,7 +176,7 @@ char buf[MAX_LINE];
 int length;
 char str[MAX_LINE];
 int  opcode;
-tlv_request_t request;
+
 
 do { 
 
@@ -192,15 +210,34 @@ if (unlink(SERVER_FIFO_PATH) < 0)
 else
     printf("Server FIFO has been destroyed\n");
 //*************************************** 
-/*
-    spthread_t request;
 
-    if(pthread_screate(&request, NULL, NULL, NULL) != 0){
-        perror("Error creating request threads\n");
-        exit(5);
-}*/
+    pthread_t temp[num_eletronic_counter];
+    threads = temp;
+    int threads_num[num_eletronic_counter];
 
-//close_slog_file();
-//close_ulog_file();
+    int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
+
+    if(slog < 0){
+        fprintf(stderr, "Error opening server log file.\n");
+        exit(1);
+    }
+    int ulog = open(USER_LOGFILE, O_WRONLY | O_TRUNC);
+
+    if(ulog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+
+    for (int i = 1; i <= num_eletronic_counter; i++) {
+        threads_num[i-1] = i;
+        pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
+    }
+
+
+    close(slog);
+    close(ulog);
+
     return 0;
+
 }
+
