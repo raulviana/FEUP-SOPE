@@ -88,7 +88,7 @@ char* getSha256(char* password, char* salt){
         strcat(command, password);
         strcat(command, salt);
         strcat(command, " | sha256sum");
-        return runCommand(command));
+        return runCommand(command);
 
 }
 
