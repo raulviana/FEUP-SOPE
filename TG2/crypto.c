@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 
 #include "constants.h"
 
@@ -9,7 +10,6 @@
 
 char getSha256(char* nameFilePtr, char sha256result[]){
         char* filePathPtr = "/usr/bin/sha256sum";
-
         int fd1[2], fd2[2], n;
         pid_t pid;
         pipe(fd1); pipe(fd2);
@@ -23,7 +23,6 @@ char getSha256(char* nameFilePtr, char sha256result[]){
         strcpy(filePath, filePathPtr);
         char file[512];       //Co-Process name to be called
         strcpy(file, filePath);
-
         int status;
         pid = fork();
         if (pid > 0) {
@@ -46,7 +45,6 @@ char getSha256(char* nameFilePtr, char sha256result[]){
                 return *sha256result;
         }
         else {
-
                 char in[MAXLINE];
                 int n2;
                 close(fd1[1]); close(fd2[0]);
@@ -55,11 +53,45 @@ char getSha256(char* nameFilePtr, char sha256result[]){
                 n2 = read(fd1[0], in, sizeof(nameFile));
                 in[n2] = 0;
                 close(fd1[0]);
-
                 execl(filePath, file, in, NULL);
                 close(fd2[1]);
                 exit(0);
         }
+}
+
+char* runCommand(char* command){
+
+    FILE *fp;
+
+    //printf("\nCommand %s", command);
+    /* Open the command for reading. */
+    fp = popen(command, "r");
+    if (fp == NULL) {
+        printf("Failed to run command\n" );
+        exit(1);
+    }
+
+//    char path[1024];
+    char output[1024];
+
+    fscanf(fp,"%[^\n]", output);
+
+    /* close */
+    pclose(fp);
+
+    return strdup(&output[0]);
+}
+
+bool checkPassword(char* password, char* salt, bank_account_t account){
+        //check if the sha256sum of password+salt is equal to the hash of the account
+        char command[1024] = "echo -n ";
+        strcat(command, password);
+        strcat(command, salt);
+        strcat(command, " | sha256sum");
+        printf(runCommand(command));
+        if (strcmp(account.hash, runCommand(command))) return true;
+        else return false;
+
 }
 
 void createSalt(char* newSalt){
