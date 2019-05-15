@@ -7,7 +7,7 @@
 #include "constants.h"
 
 #define MAXLINE 512
-
+/*
 char getSha256(char* nameFilePtr, char sha256result[]){
         char* filePathPtr = "/usr/bin/sha256sum";
         int fd1[2], fd2[2], n;
@@ -57,7 +57,7 @@ char getSha256(char* nameFilePtr, char sha256result[]){
                 close(fd2[1]);
                 exit(0);
         }
-}
+}*/
 
 char* runCommand(char* command){
 
@@ -82,13 +82,22 @@ char* runCommand(char* command){
     return strdup(&output[0]);
 }
 
+char* getSha256(char* password, char* salt){
+        //returns the sha256sum of password+salt
+        char command[1024] = "echo -n ";
+        strcat(command, password);
+        strcat(command, salt);
+        strcat(command, " | sha256sum");
+        return runCommand(command));
+
+}
+
 bool checkPassword(char* password, char* salt, bank_account_t account){
         //check if the sha256sum of password+salt is equal to the hash of the account
         char command[1024] = "echo -n ";
         strcat(command, password);
         strcat(command, salt);
         strcat(command, " | sha256sum");
-        printf(runCommand(command));
         if (strcmp(account.hash, runCommand(command))) return true;
         else return false;
 
