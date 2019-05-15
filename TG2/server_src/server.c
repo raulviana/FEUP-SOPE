@@ -33,6 +33,8 @@ pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
 tlv_request_t request;
 bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
 
+bool run = 1;
+
 void print_usage(FILE *stream)
 {
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
@@ -131,25 +133,26 @@ void shutdown(){
     pthread_mutex_destroy(&mutexI);
     sem_close(sem1);
     sem_close(sem2);
+    run = 0;
 }
 void *wRequest(void *n) {
     
     char mess[50];
-   
-    usleep(request.value.header.op_delay_ms * 1000);
+   printf("THREAD\n");
+//    usleep(request.value.header.op_delay_ms * 1000);
 
-    sprintf(mess, "-OPEN%i\n", *(int *) n);
-    write(slog, mess, strlen(mess) );
+  //  sprintf(mess, "-OPEN%i\n", *(int *) n);
+    //write(slog, mess, strlen(mess) );
    
-    sem_wait(sem2);
-    while(1){
-    pthread_mutex_lock(&mutexI);
+//    sem_wait(sem2);
+    while(run){
+ /*   pthread_mutex_lock(&mutexI);
     if (sem_trywait(sem2) == -1){
         if (errno == EAGAIN){
             pthread_mutex_unlock(&mutexI);
             continue;
         }
-    }
+    }*/
     
     pthread_mutex_unlock(&mutexI); 
     
@@ -157,7 +160,9 @@ void *wRequest(void *n) {
 
         //Criação de Conta
         case OP_CREATE_ACCOUNT:
+        printf("CREATE\n");
             pthread_mutex_lock(&mutexI);
+            createAccount(request, accounts_array);
             //
             //logAccountCreation(int fd, int id, const bank_account_t *account);
             //
@@ -166,17 +171,19 @@ void *wRequest(void *n) {
 
         //Consulta de Saldo
         case OP_BALANCE:
-            pthread_mutex_lock(&mutexI);
-            //....
-            pthread_mutex_unlock(&mutexI);
+        printf("BALANCE\n");
+        balanceAccount(request, accounts_array);
             break;
         //Transferência
         case OP_TRANSFER:
-
+        printf("TRANSFER\n");
+        transferAccount(request, accounts_array);
             break;
 
         //Encerramentodo Servidor
         case OP_SHUTDOWN:
+        printf("SHUTDOWN\n");
+        
             shutdown();
             break;
         default:
@@ -207,7 +214,7 @@ int main(int argc, char*argv[]){
 
     //******************Set Up Server******************************
     
-
+ 
     //Verify arguments**********************************
     if (argc != 3) {
         printf("Wrong number of arguments\n");
@@ -243,8 +250,26 @@ int main(int argc, char*argv[]){
     accounts_array[ADMIN_ACCOUNT_ID] = new_account;
     //Conta admnistrador criada
 
-    //open_slog_file(); //**Só comentei para poder correr..
-    //open_ulog_file();
+    slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
+
+    if(slog < 0){
+        fprintf(stderr, "Error opening server log file.\n");
+        exit(1);
+    }
+    int ulog = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
+
+    if(ulog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+
+    pthread_t threads[num_eletronic_counter];
+    int threads_num[num_eletronic_counter];
+
+    for (int i = 1; i <= num_eletronic_counter; i++) {
+        threads_num[i-1] = i;
+        pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
+    }
 
     //Server fifo **********************
     int fd, fd_dummy;
@@ -269,6 +294,7 @@ int length;
 char str[MAX_LINE];
 int  opcode;
 
+
 do {
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
@@ -292,6 +318,7 @@ if(request.type == OP_CREATE_ACCOUNT) createAccount( request, &accounts_array[MA
 
 buf[0] = '\0';
 numread = 0;
+
 if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
 }while (1);
 
@@ -306,27 +333,9 @@ else
     printf("Server FIFO has been destroyed\n");
 //*************************************** 
 
-    pthread_t temp[num_eletronic_counter];
-    threads = temp;
-    int threads_num[num_eletronic_counter];
 
-     slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
-
-    if(slog < 0){
-        fprintf(stderr, "Error opening server log file.\n");
-        exit(1);
-    }
-    int ulog = open(USER_LOGFILE, O_WRONLY | O_TRUNC);
-
-    if(ulog < 0){
-        fprintf(stderr, "Error opening USER log file.\n");
-        exit(1);
-    }
-
-    for (int i = 1; i <= num_eletronic_counter; i++) {
-        threads_num[i-1] = i;
-        pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
-    }
+    
+    
 
     logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
     //printf(syncM);
@@ -335,10 +344,9 @@ else
 
     pthread_mutex_unlock(&mutexI);
 
-    for(int i = 0; i < num_eletronic_counter; i++){
+   for(int i = 0; i < num_eletronic_counter; i++){
         pthread_join(temp[i],NULL);
     }
-
 
     close(slog);
     close(ulog);
