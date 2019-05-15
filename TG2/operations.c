@@ -92,7 +92,7 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
     char newSalt[SALT_LEN + 1];
     createSalt(newSalt);
     strcpy(new_account.salt, newSalt);
-    strcpy(new_account.hash, request.value.header.password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
+    strcpy(new_account.hash, getSha256(request.value.header.password, newSalt));
     new_account.in_use = IN_USE;
     accounts_array[request.value.create.account_id] = new_account;
     
