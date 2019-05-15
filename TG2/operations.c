@@ -1,19 +1,18 @@
 
 
 #include "types.h"
+#include "constants.h"
 
 #define MAX_LEN_PID 5
 #define MAX_LINE 512
 
 void sendMessage(int pid, tlv_reply_t tlv_reply){
 
-    char strPid[MAX_LEN_PID];
-    sprintf(strPid, "%d", pid);
+    char strPid[WIDTH_ID];
     char FIFO_reply_name[USER_FIFO_PATH_LEN];
-    strcpy(FIFO_reply_name, USER_FIFO_PATH_PREFIX);
-    strcat(FIFO_reply_name, strPid);
-    printf("FIFOname: %s\n", FIFO_reply_name);
-    
+    sprintf(strPid, "%d", pid);
+    sprintf(FIFO_reply_name, "%s%d", USER_FIFO_PATH_PREFIX, pid);
+     
 
     tlv_reply.length = sizeof(tlv_reply);
     size_t len;
@@ -51,14 +50,32 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
                 tlv_reply.value.header.ret_code, 
                 tlv_reply.value.shutdown.active_offices);
             break;
-      }
+        }
     }
- printf("length: %ld\n", len);
-    printf("strReply: %s\n", strReply);
+    tlv_reply.length = len;
+ 
     strReply[len] = '\0';
-    char* str = calloc(1, sizeof *str * len +1);
-    strcpy(str, strReply);
-printf("str: %s\n", str);
+    char* reply_str = calloc(1, sizeof *reply_str * len +1);
+    strcpy(reply_str, strReply);
+printf("str: %s\n", reply_str);
+
+
+int fd;
+if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
+        printf("Failed to open server requests FIFO\n");
+        exit(1);
+    } 
+    else {
+        printf("Open Successfully");
+    }
+
+    int write_result = write(fd, reply_str, tlv_reply.length);
+    if (write_result < 0){
+        printf("Error: Failed to send message to server FIFO\n");
+        exit(2);
+    }
+usleep(2);
+
 }
 
 
@@ -66,20 +83,23 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
     tlv_reply_t tlv_reply;
     bank_account_t new_account;
 
+    if(accounts_array[request.value.create.account_id].in_use == IN_USE){
+         tlv_reply.value.header.ret_code =RC_ID_IN_USE;
+    }
+    else{
     new_account.account_id = request.value.create.account_id;
     new_account.balance = request.value.create.balance;
     char newSalt[SALT_LEN + 1];
     createSalt(newSalt);
     strcpy(new_account.salt, newSalt);
     strcpy(new_account.hash, request.value.header.password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
+    new_account.in_use = IN_USE;
     accounts_array[request.value.create.account_id] = new_account;
     
     tlv_reply.type = request.type;
     tlv_reply.value.header.account_id = request.value.header.account_id;
     tlv_reply.value.header.ret_code = RC_OK;
-
-    if(accounts_array[request.value.create.account_id].account_id != 0)
-         tlv_reply.value.header.ret_code =RC_ID_IN_USE;
+    }
 
     sendMessage(request.value.header.pid, tlv_reply);
 }

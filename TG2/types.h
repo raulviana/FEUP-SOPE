@@ -58,6 +58,7 @@ typedef struct bank_account {
   char hash[HASH_LEN + 1];
   char salt[SALT_LEN + 1];
   uint32_t balance;
+  int in_use;
 } bank_account_t;
 
 //

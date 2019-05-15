@@ -88,38 +88,34 @@ void setup_alarm(){
     signal(SIGALRM, alarm_hanlder);
 }
 
-/*void receive_message(char *strPid){
+void receive_message(char *strPid){
+int fd, fd_dummy;
 
-    int fd, fd_dummy;
-    char line[MAX_LINE_LENGTH];
-    int optype; 
-    
-    setup_alarm();
-    alarm(FIFO_TIMEOUT_SECS);
+    if (mkfifo(SERVER_FIFO_PATH,0660)<0)
+        if (errno==EEXIST) printf("Inclient Reply FIFO already exists\n");
+        else {
+            printf("Can't create Reply FIFO\n");
+            print_usage(stderr);
+            exit(ERR_FIFO);
+        }
+    else printf("In client Reply FIFO sucessfully created\n");
+     if ((fd=open(SERVER_FIFO_PATH,O_RDONLY)) !=-1)
+        printf("Reply FIFO created in READONLY mode\n"); 
+    if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
+      printf("Reply FIFO openned in WRITEONLY mode\n"); 
 
-    char fifo_name[USER_FIFO_PATH_LEN] = "\0";
-    strcpy(fifo_name, USER_FIFO_PATH_PREFIX);
-    strcat(fifo_name, strPid);
-    if ((fd=open(fifo_name,O_RDONLY)) !=-1)
-    printf("Reply FIFO openned in READONLY mode\n");
-    if ((fd_dummy=open(fifo_name,O_WRONLY)) !=-1)
-    printf("Reply FIFO openned in WRITEONLY mode\n");
-    
-    do {
-      read(fd,&optype,sizeof(int));
-      if (optype >=0 || optype < 4) {
-        read(fd,line,MAX_LINE_LENGTH);
- printf("line %s\n",line);
- }
- } while (optype!=0);
-    tlv_reply_t *message_received;
-    // reconstruct_message(line, message_received);
-   
-    //int log_result = logReply(fifo_response, getpid(), *message_received); 
-   
+    char buffer[MAX_LINE_LENGTH];
+    int read_number;
+    read_number = read(fd, buffer, MAX_LINE_LENGTH);
+    buffer[read_number] = '\0';
+    printf("buf: %s\n", buffer);
+
+    close(fd);
+    close(fd_dummy);
 
 
-}*/
+
+}
 
 
 int main(int argc, char *argv[]) {
@@ -262,7 +258,7 @@ int main(int argc, char *argv[]) {
 
     send_message(message_send);
 
-  //  receive_message(strPid);
+    receive_message(strPid);
 
 return 0;
     

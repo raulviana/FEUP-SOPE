@@ -239,6 +239,7 @@ int main(int argc, char*argv[]){
     createSalt(newSalt);
     strcpy(new_account.salt, newSalt);
     strcpy(new_account.hash, password);  //TODO depois de fazer a funcao sha256 aqui entra a hash
+    new_account.in_use = IN_USE;
     accounts_array[ADMIN_ACCOUNT_ID] = new_account;
     //Conta admnistrador criada
 
