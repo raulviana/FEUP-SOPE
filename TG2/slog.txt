@@ -1,0 +1,5 @@
+R - 21921 - [  8 bytes] 0000   CREATE           OK
+R - 21921 - [  8 bytes] 0000   CREATE           OK
+R - 21921 - [ 12 bytes] 0003 TRANSFER           OK        600€
+R - 21921 - [ 12 bytes] 0003  BALANCE           OK        200€
+R - 21921 - [ 12 bytes] 0002  BALANCE           OK        600€

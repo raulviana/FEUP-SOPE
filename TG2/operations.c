@@ -2,6 +2,8 @@
 
 #include "types.h"
 #include "constants.h"
+#include "log.c"
+
 
 #define MAX_LEN_PID 5
 #define MAX_LINE 512
@@ -74,6 +76,27 @@ if ((fd = open(FIFO_reply_name, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         exit(2);
     }
     close(fd);
+
+
+
+    int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+
+    if(slog < 0){
+        fprintf(stderr, "Error opening SERVER log file.\n");
+        exit(1);
+    }
+ 
+ int saved_stdout = dup(STDOUT_FILENO);
+ dup2(slog,STDOUT_FILENO); 
+
+    const tlv_reply_t* tlv_reply_ptr;
+    tlv_reply_ptr = &tlv_reply;
+    logReply(fd, getpid(), tlv_reply_ptr);
+
+    close(slog);
+
+     dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
 }
 
 
@@ -102,7 +125,7 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
     sendMessage(request.value.header.pid, tlv_reply);
 }
 
-void transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
+tlv_reply_t transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
 
     tlv_reply_t tlv_reply;
     int ok = 0;
@@ -137,9 +160,11 @@ void transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_T
     tlv_reply.value.transfer.balance = accounts_array[request.value.transfer.account_id].balance;
     
     sendMessage(request.value.header.pid, tlv_reply);
+
+    return tlv_reply;
 }
 
-void balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
+tlv_reply_t balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
     tlv_reply_t tlv_reply;
 
     tlv_reply.type = request.type;
@@ -148,4 +173,6 @@ void balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_TH
     tlv_reply.value.balance.balance = accounts_array[request.value.header.account_id].balance;
 
     sendMessage(request.value.header.pid, tlv_reply);
+
+    return tlv_reply;
 }
