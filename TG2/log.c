@@ -58,7 +58,7 @@ int logRequest(int fd, int id, const tlv_request_t *request) {
   if (!request)
     return -1;
 
-  char buffer[PIPE_BUF];
+  char buffer[512];
 
   switch (request->type) {
     case OP_CREATE_ACCOUNT:

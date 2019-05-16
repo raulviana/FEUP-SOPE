@@ -20,6 +20,7 @@
 
 #define MAX_LINE_LENGTH 512
 #define WIDTH_FIFO_NAME 16
+#define MAX_ARGUMENTS 5
 
 typedef unsigned int u_int;
 
@@ -77,6 +78,27 @@ void *send_message (tlv_request_t message_send){
         exit(MESSAGE_SENT_ERROR);
     }
     close(fd);
+
+    //open log
+
+    int ulog = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+
+    if(ulog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    
+    const tlv_request_t* tlv_ptr;
+    tlv_ptr = &message_send;
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(ulog,STDOUT_FILENO); 
+   
+    logRequest(fd, message_send.value.header.pid, tlv_ptr);
+
+    close(ulog);
+
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
 }
 
 void alarm_hanlder(){
@@ -90,8 +112,14 @@ void setup_alarm(){
 
 void receive_message(char *strPid){
 int fd, fd_dummy;
+tlv_reply_t tlv_reply;
 
-    if (mkfifo(SERVER_FIFO_PATH,0660)<0)
+
+    char FIFO_reply_name[USER_FIFO_PATH_LEN];
+    
+    sprintf(FIFO_reply_name, "%s%d", USER_FIFO_PATH_PREFIX, getpid());
+
+    if (mkfifo(FIFO_reply_name,0660)<0)
         if (errno==EEXIST) printf("Inclient Reply FIFO already exists\n");
         else {
             printf("Can't create Reply FIFO\n");
@@ -99,21 +127,57 @@ int fd, fd_dummy;
             exit(ERR_FIFO);
         }
     else printf("In client Reply FIFO sucessfully created\n");
-     if ((fd=open(SERVER_FIFO_PATH,O_RDONLY)) !=-1)
+     if ((fd=open(FIFO_reply_name,O_RDONLY)) !=-1)
         printf("Reply FIFO created in READONLY mode\n"); 
-    if ((fd_dummy=open(SERVER_FIFO_PATH,O_WRONLY)) !=-1)
+    if ((fd_dummy=open(FIFO_reply_name,O_WRONLY)) !=-1)
       printf("Reply FIFO openned in WRITEONLY mode\n"); 
 
     char buffer[MAX_LINE_LENGTH];
     int read_number;
     read_number = read(fd, buffer, MAX_LINE_LENGTH);
     buffer[read_number] = '\0';
-    printf("buf: %s\n", buffer);
+    
+    char reply_list[MAX_ARGUMENTS][MAX_LINE_LENGTH];
+    int count = 0;
+    char delim[] = "|";
+	char *ptr = strtok(buffer, delim);
+
+	while(ptr != NULL){
+		strcpy(reply_list[count], ptr);
+		ptr = strtok(NULL, delim);
+        count++;
+	}
+    tlv_reply.length = atoi(reply_list[0]);
+    tlv_reply.type = atoi(reply_list[1]);
+    tlv_reply.value.header.account_id = atoi(reply_list[2]);
+    tlv_reply.value.header.ret_code = atoi(reply_list[3]);
+    if(tlv_reply.type == OP_BALANCE) tlv_reply.value.balance.balance = atoi(reply_list[4]);
+    if(tlv_reply.type == OP_TRANSFER) tlv_reply.value.transfer.balance = atoi(reply_list[4]);
+    if(tlv_reply.type == OP_SHUTDOWN) tlv_reply.value.shutdown.active_offices = atoi(reply_list[4]); 
 
     close(fd);
     close(fd_dummy);
 
+    //print to file
 
+    int ulog = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+
+    if(ulog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+ 
+ int saved_stdout = dup(STDOUT_FILENO);
+ dup2(ulog,STDOUT_FILENO); 
+
+    const tlv_reply_t* tlv_reply_ptr;
+    tlv_reply_ptr = &tlv_reply;
+    logReply(fd, getpid(), tlv_reply_ptr);
+
+    close(ulog);
+
+ dup2(saved_stdout, STDOUT_FILENO);
+ close(saved_stdout);
 
 }
 
@@ -255,10 +319,11 @@ int main(int argc, char *argv[]) {
 
     //*************************************************
 
-
     send_message(message_send);
 
     receive_message(strPid);
+
+   
 
 return 0;
     

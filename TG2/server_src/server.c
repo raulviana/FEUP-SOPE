@@ -39,61 +39,6 @@ void print_usage(FILE *stream)
 {
     fprintf(stream, "Usage: ./server <Number of Eletronic Bank Officces> <\"Admin Password\">\n");
 }
-/*
-char getSha256(char* nameFilePtr, char sha256result[]){
-        char* filePathPtr = "/usr/bin/sha256sum";
-
-        int fd1[2], fd2[2], n;
-        pid_t pid;
-        pipe(fd1); pipe(fd2);
-        char result[MAXLINE];
-        const char token[2] = ":";
-        const char* ptr;
-        char nameFile[512];     //File to be procesed by the co-process
-        nameFile[0] = '\0';
-        strcpy(nameFile, nameFilePtr);
-        char filePath[512];    //Co-Proces path to be called
-        strcpy(filePath, filePathPtr);
-        char file[512];       //Co-Process name to be called
-        strcpy(file, filePath);
-
-        int status;
-        pid = fork();
-        if (pid > 0) {
-                //parent
-                close(fd1[0]); close(fd2[1]);
-                write(fd1[1], nameFile, sizeof(nameFile));
-                n = read(fd2[0], result, MAXLINE);
-                result[n] = 0;
-                int i = 0;
-                while (result[i] != '\0') {
-                        if (result[i] == ',') { //Se result contiver ',' sera substituido por '|'
-                                result[i] = '|';
-                        }
-                        i++;
-                }
-                ptr = strrchr(result, *token);
-                if (ptr != NULL) strcpy(sha256result, ptr + 1);
-                else strcpy(sha256result, result);
-                wait(&status);
-                return *sha256result;
-        }
-        else {
-
-                char in[MAXLINE];
-                int n2;
-                close(fd1[1]); close(fd2[0]);
-                dup2(fd1[0], STDIN_FILENO);
-                dup2(fd2[1], STDOUT_FILENO);
-                n2 = read(fd1[0], in, sizeof(nameFile));
-                in[n2] = 0;
-                close(fd1[0]);
-
-                execl(filePath, file, in, NULL);
-                close(fd2[1]);
-                exit(0);
-        }
-}*/
 
 tlv_request_t remakeTLV(int opcode, int length, char str[], tlv_request_t request){
     char list[MAX_ARGUMENTS][MAX_LINE];
@@ -135,6 +80,7 @@ void shutdown(){
     sem_close(sem2);
     run = 0;
 }
+
 void *wRequest(void *n) {
     
     char mess[50];
@@ -146,13 +92,14 @@ void *wRequest(void *n) {
    
 //    sem_wait(sem2);
     while(run){
- /*   pthread_mutex_lock(&mutexI);
+ 
+ //   pthread_mutex_lock(&mutexI);
     if (sem_trywait(sem2) == -1){
         if (errno == EAGAIN){
             pthread_mutex_unlock(&mutexI);
             continue;
         }
-    }*/
+    }
     
     pthread_mutex_unlock(&mutexI); 
     
@@ -339,10 +286,11 @@ else
 
     logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
     //printf(syncM);
-    pthread_mutex_lock(&mutexI);
+ //   pthread_mutex_lock(&mutexI);
     logDelay(STDOUT_FILENO, MAIN_THREAD_ID, 0);
 
-    pthread_mutex_unlock(&mutexI);
+  //  pthread_mutex_unlock(&mutexI);
+
 
    for(int i = 0; i < num_eletronic_counter; i++){
         pthread_join(temp[i],NULL);

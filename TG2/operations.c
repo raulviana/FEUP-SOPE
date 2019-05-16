@@ -13,11 +13,10 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
     sprintf(strPid, "%d", pid);
     sprintf(FIFO_reply_name, "%s%d", USER_FIFO_PATH_PREFIX, pid);
      
-
     tlv_reply.length = sizeof(tlv_reply);
     size_t len;
     char strReply[MAX_LINE];
-        len = sprintf(strReply, "%d%d|%d|%d", 
+        len = sprintf(strReply, "%d|%d|%d|%d", 
             tlv_reply.length,
             tlv_reply.type, 
             tlv_reply.value.header.account_id, 
@@ -27,7 +26,7 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
     if(tlv_reply.type != 0){
       switch (code){
         case OP_BALANCE:
-            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+            len = sprintf(strReply, "%d|%d|%d|%d|%d", 
                 tlv_reply.length,
                 tlv_reply.type, 
                 tlv_reply.value.header.account_id, 
@@ -35,7 +34,7 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
                 tlv_reply.value.balance.balance);
             break;
         case OP_TRANSFER:
-            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+            len = sprintf(strReply, "%d|%d|%d|%d|%d", 
                 tlv_reply.length,
                 tlv_reply.type, 
                 tlv_reply.value.header.account_id, 
@@ -43,7 +42,7 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
                 tlv_reply.value.transfer.balance);
             break;
         case OP_SHUTDOWN:
-            len = sprintf(strReply, "%d%d|%d|%d|%d", 
+            len = sprintf(strReply, "%d|%d|%d|%d|%d", 
                 tlv_reply.length,
                 tlv_reply.type, 
                 tlv_reply.value.header.account_id, 
@@ -61,7 +60,7 @@ printf("str: %s\n", reply_str);
 
 
 int fd;
-if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
+if ((fd = open(FIFO_reply_name, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Failed to open server requests FIFO\n");
         exit(1);
     } 
@@ -74,8 +73,7 @@ if ((fd = open(SERVER_FIFO_PATH, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         printf("Error: Failed to send message to server FIFO\n");
         exit(2);
     }
-usleep(2);
-
+    close(fd);
 }
 
 
@@ -95,11 +93,11 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
     strcpy(new_account.hash, getSha256(request.value.header.password, newSalt));
     new_account.in_use = IN_USE;
     accounts_array[request.value.create.account_id] = new_account;
-    
-    tlv_reply.type = request.type;
-    tlv_reply.value.header.account_id = request.value.header.account_id;
     tlv_reply.value.header.ret_code = RC_OK;
     }
+
+    tlv_reply.type = request.type;
+    tlv_reply.value.header.account_id = request.value.header.account_id;
 
     sendMessage(request.value.header.pid, tlv_reply);
 }
@@ -107,26 +105,37 @@ void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THR
 void transferAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
 
     tlv_reply_t tlv_reply;
-    
-    accounts_array[request.value.header.account_id].balance -= 
-                        request.value.transfer.amount;
+    int ok = 0;
 
+    if (request.value.header.account_id == request.value.transfer.account_id){
+        tlv_reply.value.header.ret_code = RC_SAME_ID;
+        ok = -1;
+    }
+        
+    if(accounts_array[request.value.header.account_id].balance < MIN_BALANCE){
+        tlv_reply.value.header.ret_code = RC_NO_FUNDS;
+        ok = -1;
+    }
+    if(accounts_array[request.value.transfer.account_id].balance > MAX_BALANCE){
+        tlv_reply.value.header.ret_code = RC_TOO_HIGH;
+        ok = -1;
+    }
+        
+    if (ok == 0){
+        accounts_array[request.value.header.account_id].balance -= 
+                        request.value.transfer.amount;
     
     accounts_array[request.value.transfer.account_id].balance +=
                         request.value.transfer.amount;
+    
+    tlv_reply.value.header.ret_code = RC_OK;
+    }
 
     tlv_reply.type = request.type;
     tlv_reply.value.header.account_id = request.value.header.account_id;
-    tlv_reply.value.header.ret_code = RC_OK;
+    
     tlv_reply.value.transfer.balance = accounts_array[request.value.transfer.account_id].balance;
     
-    if (request.value.header.account_id == request.value.transfer.account_id) 
-        tlv_reply.value.header.ret_code = RC_SAME_ID;
-    if(accounts_array[request.value.header.account_id].balance < MIN_BALANCE)
-        tlv_reply.value.header.ret_code = RC_NO_FUNDS;
-    if(accounts_array[request.value.transfer.account_id].balance > MAX_BALANCE)
-        tlv_reply.value.header.ret_code = RC_TOO_HIGH;
-
     sendMessage(request.value.header.pid, tlv_reply);
 }
 
