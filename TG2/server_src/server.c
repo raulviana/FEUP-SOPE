@@ -27,13 +27,19 @@
 int num_eletronic_counter;
 int slog;
 
-sem_t *sem1, *sem2;
+sem_t sem1, sem2;
+int val1, val2;
 pthread_t *threads;
 pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
 tlv_request_t request;
 bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
 
+tlv_request_t buffer[MAX_BANK_ACCOUNTS];
+
 bool run = 1;
+int bufout = 0;
+
 
 void print_usage(FILE *stream)
 {
@@ -76,32 +82,38 @@ void shutdown(){
     chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
 
     pthread_mutex_destroy(&mutexI);
-    sem_close(sem1);
-    sem_close(sem2);
+    sem_close(&sem1);
+    sem_close(&sem2);
     run = 0;
+}
+
+void get_request(tlv_request_t *itemp){
+    pthread_mutex_lock(&buffer_lock);
+    *itemp = buffer[bufout];
+    bufout = (bufout + 1) % MAX_BANK_ACCOUNTS;
+    pthread_mutex_unlock(&buffer_lock);
+    return;
 }
 
 void *wRequest(void *n) {
     
-    char mess[50];
-   printf("THREAD\n");
-//    usleep(request.value.header.op_delay_ms * 1000);
-
-  //  sprintf(mess, "-OPEN%i\n", *(int *) n);
-    //write(slog, mess, strlen(mess) );
+    sem_getvalue(&sem2, &val1);
+    logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, 0, val1);
+    sem_wait(&sem2);
    
-//    sem_wait(sem2);
+    get_request(&request);
+
     while(run){
  
  //   pthread_mutex_lock(&mutexI);
-    if (sem_trywait(sem2) == -1){
+    if (sem_trywait(&sem2) == -1){
         if (errno == EAGAIN){
             pthread_mutex_unlock(&mutexI);
             continue;
         }
     }
     
-    pthread_mutex_unlock(&mutexI); 
+ //   pthread_mutex_unlock(&mutexI); 
     
     switch(request.type){
 
@@ -139,20 +151,20 @@ void *wRequest(void *n) {
     }
 
     
-    pthread_mutex_unlock(&mutexI); 
+ //   pthread_mutex_unlock(&mutexI); 
     
     //printf("Thread");
 
    
     }
-    sprintf(mess, "CLOSE: %i\n", *(int *) n);
-    write(slog, mess, strlen(mess));
 
+    sem_post(&sem1);
+    sem_getvalue(&sem1, &val2);
+    logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, val2);
 
-    sem_post(sem1);
     //logReply(STDOUT_FILENO, *(int *)n, &request);
 
-    //logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
+    logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
     pthread_exit(NULL);
 }
 
@@ -194,7 +206,7 @@ int main(int argc, char*argv[]){
     strcpy(new_account.salt, newSalt);
     strcpy(new_account.hash, getSha256(password,newSalt));  //depois de fazer a funcao sha256 aqui entra a hash
     new_account.in_use = IN_USE;
-    accounts_array[ADMIN_ACCOUNT_ID] = new_account;
+    
     //Conta admnistrador criada
 
     slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
@@ -213,10 +225,23 @@ int main(int argc, char*argv[]){
     pthread_t threads[num_eletronic_counter];
     int threads_num[num_eletronic_counter];
 
-    for (int i = 1; i <= num_eletronic_counter; i++) {
-        threads_num[i-1] = i;
-        pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
-    }
+    sem_init(&sem1, 0, num_eletronic_counter);
+    sem_getvalue(&sem1, &val1);
+    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, val2);
+
+    
+
+    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
+    pthread_mutex_lock(&mutexI);
+    logDelay(STDOUT_FILENO, MAIN_THREAD_ID, 0);
+
+    accounts_array[ADMIN_ACCOUNT_ID] = new_account;
+
+    logAccountCreation(STDOUT_FILENO, MAIN_THREAD_ID, &accounts_array[ADMIN_ACCOUNT_ID]);
+
+    pthread_mutex_unlock(&mutexI);
+    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, 0);
+   
 
     //Server fifo **********************
     int fd, fd_dummy;
@@ -243,6 +268,11 @@ int  opcode;
 
 
 do {
+ /*   sem_getvalue(&sem1, &val1);
+    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, val1);
+    sem_wait(&sem1);
+    logRequest(STDOUT_FILENO, request.value.header.pid, &request);
+    put_request(request);*/
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
 opcode = atoi(buf);               //preenche opcode
@@ -259,16 +289,19 @@ strcpy(str, buf);               //str contém o resto da mensagem
 
 request = remakeTLV(opcode, length, str, request);    //re-constroi a mensagem TLV
 //TODO colocar mensagem num thread e ir à conta correspondente
-if (request.type== OP_TRANSFER) transferAccount( request, &accounts_array[MAIN_THREAD_ID]);
+/*if (request.type== OP_TRANSFER) transferAccount( request, &accounts_array[MAIN_THREAD_ID]);
 if(request.type == OP_BALANCE) balanceAccount( request, &accounts_array[MAIN_THREAD_ID]);
-if(request.type == OP_CREATE_ACCOUNT) createAccount( request, &accounts_array[MAIN_THREAD_ID]);
+if(request.type == OP_CREATE_ACCOUNT) createAccount( request, &accounts_array[MAIN_THREAD_ID]);*/
 
 buf[0] = '\0';
 numread = 0;
 
 if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
-}while (1);
-
+}while (run);
+for (int i = 1; i <= num_eletronic_counter; i++) {
+        threads_num[i-1] = i;
+        pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
+    }
 
 
 close(fd);
@@ -293,7 +326,7 @@ else
 
 
    for(int i = 0; i < num_eletronic_counter; i++){
-        pthread_join(temp[i],NULL);
+        pthread_join(threads[i],NULL);
     }
 
     close(slog);
