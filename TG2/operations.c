@@ -103,6 +103,7 @@ if ((fd = open(FIFO_reply_name, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
 void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
     tlv_reply_t tlv_reply;
     bank_account_t new_account;
+    usleep(request.value.header.op_delay_ms*1000);
 
     if(accounts_array[request.value.create.account_id].in_use == IN_USE){
          tlv_reply.value.header.ret_code =RC_ID_IN_USE;
@@ -129,6 +130,7 @@ tlv_reply_t transferAccount(tlv_request_t request, bank_account_t accounts_array
 
     tlv_reply_t tlv_reply;
     int ok = 0;
+    usleep(request.value.header.op_delay_ms*1000);
 
     if (request.value.header.account_id == request.value.transfer.account_id){
         tlv_reply.value.header.ret_code = RC_SAME_ID;
@@ -166,6 +168,8 @@ tlv_reply_t transferAccount(tlv_request_t request, bank_account_t accounts_array
 
 tlv_reply_t balanceAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
     tlv_reply_t tlv_reply;
+    
+    usleep(request.value.header.op_delay_ms*1000);
 
     tlv_reply.type = request.type;
     tlv_reply.value.header.account_id = request.value.header.account_id;
