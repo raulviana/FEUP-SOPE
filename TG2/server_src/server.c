@@ -26,8 +26,8 @@
 int num_eletronic_counter;
 int slog;
 
-sem_t sem1, sem2;
-int val1, val2;
+sem_t s1, s2;
+int semV1, semV2;
 pthread_t *threads;
 pthread_mutex_t mutexI = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t buffer_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -37,8 +37,6 @@ bank_account_t accounts_array[MAX_BANK_ACCOUNTS];
 tlv_request_t buffer[MAX_BANK_ACCOUNTS];
 
 bool run = 1;
-int bufout = 0;
-
 
 void print_usage(FILE *stream)
 {
@@ -81,8 +79,13 @@ void shutdown(){
     chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
 
     pthread_mutex_destroy(&mutexI);
+<<<<<<< HEAD
     sem_close(&sem1);
     sem_close(&sem2);
+=======
+    sem_close(&s1);
+    sem_close(&s2);
+>>>>>>> 918a4216b62160851af323ea5c4fed86b684bd0c
     run = 0;
 }
 
@@ -91,18 +94,13 @@ void *wRequest(void *n) {
     logBankOfficeOpen(STDOUT_FILENO, *(int *) n, pthread_self());
 
     tlv_reply_t tlv_reply;
-    sem_getvalue(&sem2, &val1);
-    logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, 0, val1);
- //   sem_wait(&sem2);
+    sem_getvalue(&s2, &semV1);
+    logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, 0, semV1);
+ //   sem_wait(&s2);
  
  
  //   pthread_mutex_lock(&mutexI);
-    /*if (sem_trywait(&sem2) == -1){
-        if (errno == EAGAIN){
-            pthread_mutex_unlock(&mutexI);
-            continue;
-        }
-    }*/
+
     
  //   pthread_mutex_unlock(&mutexI); 
     
@@ -133,7 +131,6 @@ void *wRequest(void *n) {
         //Encerramentodo Servidor
         case OP_SHUTDOWN:
         printf("SHUTDOWN\n");
-        
             shutdown();
             break;
         default:
@@ -141,21 +138,17 @@ void *wRequest(void *n) {
 
     }
 
-printf("HERE\n");
+
     logReply(STDOUT_FILENO, *(int *)n, &tlv_reply);
- //   pthread_mutex_unlock(&mutexI); 
+ 
+        sem_post(&s1);
+        sem_getvalue(&s1, &semV2);
+        logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, semV2);
     
-   logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
- //   }
 
-/*    sem_post(&sem1);
-    sem_getvalue(&sem1, &val2);
-    logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, val2);
-
-    logReply(STDOUT_FILENO, *(int *)n, &request);
-
-    ;*/
-    pthread_exit(NULL);
+    logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
+printf("RUN: %d\n",run);
+    return NULL;
 }
 
 
@@ -206,19 +199,13 @@ int main(int argc, char*argv[]){
         fprintf(stderr, "Error opening server log file.\n");
         exit(1);
     }
-    int ulog = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);
-
-    if(ulog < 0){
-        fprintf(stderr, "Error opening USER log file.\n");
-        exit(1);
-    }
 
     pthread_t threads[num_eletronic_counter];
     int threads_num[num_eletronic_counter];
 
-    sem_init(&sem1, 0, num_eletronic_counter);
-    sem_getvalue(&sem1, &val1);
-    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, val2);
+    sem_init(&s1, 0, num_eletronic_counter);
+    sem_getvalue(&s1, &semV1);
+    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, semV2);
 
    // for (int i = 1; i <= num_eletronic_counter; i++) {
     //    printf("HI");
@@ -263,11 +250,11 @@ char str[MAX_LINE];
 int  opcode;
 
 
-do {
-   sem_getvalue(&sem1, &val1);
-    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, val1);
-    sem_wait(&sem1);
-    logRequest(STDOUT_FILENO, request.value.header.pid, &request);
+while(run) {
+sem_getvalue(&s1, &semV1);
+logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, semV1);
+sem_wait(&s1);
+logRequest(STDOUT_FILENO, request.value.header.pid, &request);
 
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
@@ -284,7 +271,11 @@ buf [ numread ]= '\0';
 strcpy(str, buf);               //str contém o resto da mensagem
  //re-constroi a mensagem TLV
 request = remakeTLV(opcode, length, str, request);
-pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);   
+
+   sem_post(&s2);
+   sem_getvalue(&s2,&semV2);
+   logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_POST, SYNC_ROLE_PRODUCER, request.value.header.pid, semV2);
+
 //pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);
 
 //TODO colocar mensagem num thread e ir à conta correspondente
@@ -293,8 +284,12 @@ pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]
 buf[0] = '\0';
 numread = 0;
 
-//if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
-}while (run);
+pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);   
+printf("OIasssssss\n");
+
+if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
+}
+    printf("OI\n");
 
 
 close(fd);
@@ -305,10 +300,6 @@ if (unlink(SERVER_FIFO_PATH) < 0)
 else
     printf("Server FIFO has been destroyed\n");
 //*************************************** 
-
-
-    
-    
 
     logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
     //printf(syncM);
@@ -323,7 +314,6 @@ else
     }
 
     close(slog);
-    close(ulog);
 
     return 0;
 
