@@ -76,6 +76,15 @@ tlv_request_t remakeTLV(int opcode, int length, char str[], tlv_request_t reques
     return request;
 }
 
+void shutdown(){
+
+    chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
+
+    pthread_mutex_destroy(&mutexI);
+    sem_close(&sem1);
+    sem_close(&sem2);
+    run = 0;
+}
 
 void *wRequest(void *n) {
 
@@ -149,15 +158,7 @@ printf("HERE\n");
     pthread_exit(NULL);
 }
 
-void shutdown(){
 
-    chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
-
-    pthread_mutex_destroy(&mutexI);
-    sem_close(&sem1);
-    sem_close(&sem2);
-    run = 0;
-}
 
 int main(int argc, char*argv[]){
 
@@ -281,15 +282,13 @@ buf[0] = 0;
 numread = read (fd , buf , length);
 buf [ numread ]= '\0';
 strcpy(str, buf);               //str contém o resto da mensagem
-
+ //re-constroi a mensagem TLV
 request = remakeTLV(opcode, length, str, request);
 pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);   
 //pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);
- //re-constroi a mensagem TLV
+
 //TODO colocar mensagem num thread e ir à conta correspondente
-/*if (request.type== OP_TRANSFER) transferAccount( request, &accounts_array[MAIN_THREAD_ID]);
-if(request.type == OP_BALANCE) balanceAccount( request, &accounts_array[MAIN_THREAD_ID]);
-if(request.type == OP_CREATE_ACCOUNT) createAccount( request, &accounts_array[MAIN_THREAD_ID]);*/
+
 
 buf[0] = '\0';
 numread = 0;

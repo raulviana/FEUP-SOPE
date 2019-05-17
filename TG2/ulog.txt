@@ -1,2 +1,8 @@
-E - 02388 - [ 45 bytes] 02388 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 02388 - [ 20 bytes] 0000   CREATE           OK
+E - 25000 - [ 46 bytes] 25000 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 25000 - [ 20 bytes] 0000   CREATE           OK
+E - 25005 - [ 46 bytes] 25005 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 25005 - [ 20 bytes] 0000   CREATE           OK
+E - 25010 - [ 30 bytes] 25010 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 25010 - [ 20 bytes] 0003   CREATE    ID_IN_USE
+E - 25017 - [ 25 bytes] 25017 (0003, "3passwords")           [   34 ms] BALANCE 
+E - 25027 - [ 25 bytes] 25027 (0002, "2passwords")           [   34 ms] BALANCE 

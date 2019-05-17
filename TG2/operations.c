@@ -1,4 +1,8 @@
 
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "types.h"
 #include "constants.h"
@@ -58,7 +62,6 @@ void sendMessage(int pid, tlv_reply_t tlv_reply){
     strReply[len] = '\0';
     char* reply_str = calloc(1, sizeof *reply_str * len +1);
     strcpy(reply_str, strReply);
-printf("str: %s\n", reply_str);
 
 
 int fd;

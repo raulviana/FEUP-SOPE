@@ -22,6 +22,8 @@
 #define WIDTH_FIFO_NAME 16
 #define MAX_ARGUMENTS 5
 
+int alarmFlag = 0;
+
 typedef unsigned int u_int;
 
 void print_usage(FILE *stream)
@@ -103,18 +105,18 @@ void *send_message (tlv_request_t message_send){
 
 void alarm_hanlder(){
     printf(" timeout, no response from server ");
-    //TODO write in log
-    exit(0);
+   exit(0);
 }
 void setup_alarm(){
     signal(SIGALRM, alarm_hanlder);
 }
 
-void receive_message(char *strPid){
+void receive_message(){
 int fd, fd_dummy;
 tlv_reply_t tlv_reply;
 
-
+    setup_alarm();
+    alarm(FIFO_TIMEOUT_SECS);
     char FIFO_reply_name[USER_FIFO_PATH_LEN];
     
     sprintf(FIFO_reply_name, "%s%d", USER_FIFO_PATH_PREFIX, getpid());
@@ -158,8 +160,9 @@ tlv_reply_t tlv_reply;
     close(fd);
     close(fd_dummy);
 
-    //print to file
 
+
+    //print to log
     int ulog = open(USER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
 
     if(ulog < 0){
@@ -178,6 +181,9 @@ tlv_reply_t tlv_reply;
 
  dup2(saved_stdout, STDOUT_FILENO);
  close(saved_stdout);
+
+ if(tlv_reply.value.header.ret_code == 0) printf("\n\n\n\n\nOperation Success\n\n\n\n\n");
+ else printf("\n\n\n\n\nOperation Failed, see log file for details.\n\n\n\n\n");
 
 }
 
@@ -200,8 +206,7 @@ int main(int argc, char *argv[]) {
 
     //PID
     header.pid = getpid();
-    char strPid[WIDTH_ID];
-    sprintf(strPid, "%d", getpid());
+   
 
     //Account ID
     u_int account_number = atoi(argv[1]);
@@ -321,7 +326,7 @@ int main(int argc, char *argv[]) {
 
     send_message(message_send);
 
-    receive_message(strPid);
+    receive_message();
 
    
 
