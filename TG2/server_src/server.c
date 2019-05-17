@@ -76,16 +76,6 @@ tlv_request_t remakeTLV(int opcode, int length, char str[], tlv_request_t reques
     return request;
 }
 
-void shutdown(){
- 
-    chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
-
-    pthread_mutex_destroy(&mutexI);
-    sem_close(&sem1);
-    sem_close(&sem2);
-    run = 0;
-}
-
 
 void *wRequest(void *n) {
 
