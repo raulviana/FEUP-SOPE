@@ -1,10 +1,3 @@
-E - 21926 - [ 46 bytes] 21926 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 21926 - [ 20 bytes] 0000   CREATE           OK
-E - 21931 - [ 46 bytes] 21931 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
-R - 21931 - [ 20 bytes] 0000   CREATE           OK
-E - 21936 - [ 30 bytes] 21936 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
-R - 21936 - [ 20 bytes] 0003 TRANSFER           OK        600€
-E - 21938 - [ 25 bytes] 21938 (0003, "3passwords")           [   34 ms] BALANCE 
-R - 21938 - [ 20 bytes] 0003  BALANCE           OK        200€
-E - 21940 - [ 25 bytes] 21940 (0002, "2passwords")           [   34 ms] BALANCE 
-R - 21940 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 22707 - [ 46 bytes] 22707 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 22707 - [ 20 bytes] 0000   CREATE           OK
+E - 22716 - [ 23 bytes] 22716 (0000, "12345678")             [   34 ms] SHUTDOWN

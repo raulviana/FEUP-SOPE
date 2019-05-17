@@ -84,18 +84,18 @@ void shutdown(){
     sem_close(&sem1);
     sem_close(&sem2);
     run = 0;
-    exit(0);
 }
 
 
 void *wRequest(void *n) {
+
+    logBankOfficeOpen(STDOUT_FILENO, *(int *) n, pthread_self());
+
     tlv_reply_t tlv_reply;
     sem_getvalue(&sem2, &val1);
     logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, 0, val1);
  //   sem_wait(&sem2);
-   
-
-   // while(run){
+ 
  
  //   pthread_mutex_lock(&mutexI);
     /*if (sem_trywait(&sem2) == -1){
@@ -115,7 +115,6 @@ void *wRequest(void *n) {
             pthread_mutex_lock(&mutexI);
             createAccount(request, accounts_array);        
             pthread_mutex_unlock(&mutexI);
-            printf("LOG\n");
             logAccountCreation(STDOUT_FILENO, *(int *) n, accounts_array);
 
             break;
@@ -143,10 +142,11 @@ void *wRequest(void *n) {
 
     }
 
+printf("HERE\n");
     logReply(STDOUT_FILENO, *(int *)n, &tlv_reply);
  //   pthread_mutex_unlock(&mutexI); 
     
-   
+   logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
  //   }
 
 /*    sem_post(&sem1);
@@ -155,7 +155,7 @@ void *wRequest(void *n) {
 
     logReply(STDOUT_FILENO, *(int *)n, &request);
 
-    logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());*/
+    ;*/
     pthread_exit(NULL);
 }
 
