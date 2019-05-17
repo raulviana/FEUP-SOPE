@@ -264,11 +264,11 @@ int  opcode;
 
 
 do {
- /*   sem_getvalue(&sem1, &val1);
+   sem_getvalue(&sem1, &val1);
     logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, val1);
     sem_wait(&sem1);
     logRequest(STDOUT_FILENO, request.value.header.pid, &request);
-    put_request(request);*/
+
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
 opcode = atoi(buf);               //preenche opcode

@@ -1,3 +1,2 @@
-E - 22707 - [ 46 bytes] 22707 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 22707 - [ 20 bytes] 0000   CREATE           OK
-E - 22716 - [ 23 bytes] 22716 (0000, "12345678")             [   34 ms] SHUTDOWN
+E - 02388 - [ 45 bytes] 02388 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 02388 - [ 20 bytes] 0000   CREATE           OK
