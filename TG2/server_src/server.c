@@ -149,6 +149,15 @@ printf("HERE\n");
     pthread_exit(NULL);
 }
 
+void shutdown(){
+
+    chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
+
+    pthread_mutex_destroy(&mutexI);
+    sem_close(&sem1);
+    sem_close(&sem2);
+    run = 0;
+}
 
 int main(int argc, char*argv[]){
 
