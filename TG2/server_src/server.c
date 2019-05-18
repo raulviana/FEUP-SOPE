@@ -79,13 +79,9 @@ void shutdown(){
     chmod(SERVER_FIFO_PATH, S_IRUSR|S_IRGRP|S_IROTH);
 
     pthread_mutex_destroy(&mutexI);
-<<<<<<< HEAD
-    //sem_close(&sem1);
-    //sem_close(&sem2);
-=======
+    
     sem_close(&s1);
     sem_close(&s2);
->>>>>>> 918a4216b62160851af323ea5c4fed86b684bd0c
     run = 0;
 }
 

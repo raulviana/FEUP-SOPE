@@ -1,0 +1,8 @@
+R - 07632 - [  8 bytes] 0000   CREATE           OK
+R - 07632 - [  8 bytes] 0000   CREATE           OK
+R - 07632 - [  8 bytes] 0000   CREATE    ID_IN_USE
+R - 07632 - [  8 bytes] 0003   CREATE    OP_NALLOW
+R - 07632 - [ 12 bytes] 0003 TRANSFER           OK        600€
+R - 07632 - [ 12 bytes] 0000 TRANSFER    OP_NALLOW        600€
+R - 07632 - [ 12 bytes] 0003  BALANCE           OK        200€
+R - 07632 - [ 12 bytes] 0002  BALANCE           OK        600€

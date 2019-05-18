@@ -106,12 +106,24 @@ if ((fd = open(FIFO_reply_name, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
 void createAccount(tlv_request_t request, bank_account_t accounts_array[MAIN_THREAD_ID]){
     tlv_reply_t tlv_reply;
     bank_account_t new_account;
+    int ok = 0;
     usleep(request.value.header.op_delay_ms*1000);
 
     if(accounts_array[request.value.create.account_id].in_use == IN_USE){
          tlv_reply.value.header.ret_code =RC_ID_IN_USE;
+         ok = -1;
     }
-    else{
+    if(request.value.header.account_id != 0) {
+        tlv_reply.value.header.ret_code = RC_OP_NALLOW;
+        ok = -1;
+    }
+    if(checkPassword(request.value.header.password, 
+                     accounts_array[ADMIN_ACCOUNT_ID].salt,
+                     accounts_array[ADMIN_ACCOUNT_ID]) == false){
+                         tlv_reply.value.header.ret_code = RC_LOGIN_FAIL;
+                         ok = -1;
+    }
+    if(ok == 0){
     new_account.account_id = request.value.create.account_id;
     new_account.balance = request.value.create.balance;
     char newSalt[SALT_LEN + 1];
@@ -135,20 +147,29 @@ tlv_reply_t transferAccount(tlv_request_t request, bank_account_t accounts_array
     int ok = 0;
     usleep(request.value.header.op_delay_ms*1000);
 
-    if (request.value.header.account_id == request.value.transfer.account_id){
-        tlv_reply.value.header.ret_code = RC_SAME_ID;
-        ok = -1;
-    }
-        
-    if(accounts_array[request.value.header.account_id].balance < MIN_BALANCE){
-        tlv_reply.value.header.ret_code = RC_NO_FUNDS;
-        ok = -1;
-    }
     if(accounts_array[request.value.transfer.account_id].balance > MAX_BALANCE){
         tlv_reply.value.header.ret_code = RC_TOO_HIGH;
         ok = -1;
     }
-        
+    if(accounts_array[request.value.header.account_id].balance < MIN_BALANCE){
+        tlv_reply.value.header.ret_code = RC_NO_FUNDS;
+        ok = -1;
+    }
+    if (request.value.header.account_id == request.value.transfer.account_id){
+        tlv_reply.value.header.ret_code = RC_SAME_ID;
+        ok = -1;
+    } 
+    if(request.value.header.account_id == 0) {
+        tlv_reply.value.header.ret_code = RC_OP_NALLOW;
+        ok = -1;
+    }
+    if(checkPassword(request.value.header.password, 
+                     accounts_array[request.value.header.account_id].salt,
+                     accounts_array[request.value.header.account_id]) == false) {
+        tlv_reply.value.header.ret_code = RC_LOGIN_FAIL;
+        ok = -1;
+    }
+ 
     if (ok == 0){
         accounts_array[request.value.header.account_id].balance -= 
                         request.value.transfer.amount;
@@ -174,10 +195,17 @@ tlv_reply_t balanceAccount(tlv_request_t request, bank_account_t accounts_array[
     
     usleep(request.value.header.op_delay_ms*1000);
 
+    if(checkPassword(request.value.header.password, 
+                     accounts_array[request.value.header.account_id].salt,
+                     accounts_array[request.value.header.account_id]) == false){
+         tlv_reply.value.header.ret_code = RC_LOGIN_FAIL;
+    }
+    else{
     tlv_reply.type = request.type;
     tlv_reply.value.header.account_id = request.value.header.account_id;
     tlv_reply.value.header.ret_code = RC_OK;
     tlv_reply.value.balance.balance = accounts_array[request.value.header.account_id].balance;
+    }
 
     sendMessage(request.value.header.pid, tlv_reply);
 
