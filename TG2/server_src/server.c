@@ -80,8 +80,8 @@ void shutdown(){
 
     pthread_mutex_destroy(&mutexI);
 <<<<<<< HEAD
-    sem_close(&sem1);
-    sem_close(&sem2);
+    //sem_close(&sem1);
+    //sem_close(&sem2);
 =======
     sem_close(&s1);
     sem_close(&s2);
