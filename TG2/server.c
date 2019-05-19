@@ -11,10 +11,10 @@
 #include <ctype.h>
 #include <semaphore.h>
 
-#include "../constants.h"
-#include "../types.h"
-#include "../crypto.c"
-#include "../operations.c"
+#include "./constants.h"
+#include "./types.h"
+#include "./crypto.c"
+#include "./operations.c"
 
 #define ERR_ARGS 1
 #define ERR_FIFO 2
@@ -233,7 +233,6 @@ int main(int argc, char*argv[]){
     strcpy(new_account.salt, newSalt);
     strcpy(new_account.hash, getSha256(password,newSalt));  //depois de fazer a funcao sha256 aqui entra a hash
     new_account.in_use = IN_USE;
-    
     //Conta admnistrador criada
 
     slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0664);

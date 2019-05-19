@@ -8,9 +8,9 @@
 #include <sys/file.h>
 #include <errno.h>
 #include <signal.h>
-#include "../constants.h"
-#include "../types.h"
-#include "../log.c"
+#include "./constants.h"
+#include "./types.h"
+#include "./log.c"
 
 
 #define ERR_ARGS 2
@@ -101,7 +101,10 @@ void *send_message (tlv_request_t message_send){
 
     dup2(saved_stdout, STDOUT_FILENO);
     close(saved_stdout);
+
+    exit(0);
 }
+
 
 void alarm_hanlder(){
     printf(" timeout, no response from server ");
