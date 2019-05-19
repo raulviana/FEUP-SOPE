@@ -87,11 +87,21 @@ void shutdown(){
 
 void *wRequest(void *n) {
 
-    logBankOfficeOpen(STDOUT_FILENO, *(int *) n, pthread_self());
-
     tlv_reply_t tlv_reply;
-    sem_getvalue(&s2, &semV1);
+
+
+    int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO); 
+    logBankOfficeOpen(STDOUT_FILENO, *(int *) n, pthread_self()); 
     logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_WAIT, SYNC_ROLE_CONSUMER, 0, semV1);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
  //   sem_wait(&s2);
  
  
@@ -105,10 +115,33 @@ void *wRequest(void *n) {
         //Criação de Conta
         case OP_CREATE_ACCOUNT:
         printf("CREATE\n");
-            pthread_mutex_lock(&mutexI);
-            createAccount(request, accounts_array);        
-            pthread_mutex_unlock(&mutexI);
+        int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+        if(slog < 0){
+          fprintf(stderr, "Error opening USER log file.\n");
+          exit(1);
+        }
+        int saved_stdout = dup(STDOUT_FILENO);
+        dup2(slog,STDOUT_FILENO); 
+        pthread_mutex_lock(&mutexI);
+        close(slog);
+        dup2(saved_stdout, STDOUT_FILENO);
+        close(saved_stdout);
+            
+            createAccount(request, accounts_array);  
+
+             slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+        if(slog < 0){
+          fprintf(stderr, "Error opening USER log file.\n");
+          exit(1);
+        }
+        saved_stdout = dup(STDOUT_FILENO);
+        dup2(slog,STDOUT_FILENO);
+         pthread_mutex_unlock(&mutexI);
             logAccountCreation(STDOUT_FILENO, *(int *) n, accounts_array);
+        close(slog);
+        dup2(saved_stdout, STDOUT_FILENO);
+        close(saved_stdout);      
+           
 
             break;
 
@@ -135,15 +168,29 @@ void *wRequest(void *n) {
     }
 
 
-    logReply(STDOUT_FILENO, *(int *)n, &tlv_reply);
+    
  
         sem_post(&s1);
         sem_getvalue(&s1, &semV2);
-        logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, semV2);
-    
 
+
+  
+
+
+    slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO); 
+      logSyncMechSem(STDOUT_FILENO, *(int *) n, SYNC_OP_SEM_POST, SYNC_ROLE_CONSUMER, request.value.header.pid, semV2);
+    logReply(STDOUT_FILENO, *(int *)n, &tlv_reply);
     logBankOfficeClose(STDOUT_FILENO, *(int *) n, pthread_self());
-printf("RUN: %d\n",run);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+
     return NULL;
 }
 
@@ -199,32 +246,59 @@ int main(int argc, char*argv[]){
     pthread_t threads[num_eletronic_counter];
     int threads_num[num_eletronic_counter];
 
-    sem_init(&s1, 0, num_eletronic_counter);
+    
+    
+    int slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    int saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO);
+     sem_init(&s1, 0, num_eletronic_counter);
     sem_getvalue(&s1, &semV1);
     logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_INIT, SYNC_ROLE_PRODUCER, 0, semV2);
-
-   // for (int i = 1; i <= num_eletronic_counter; i++) {
-    //    printf("HI");
-    //    threads_num[i-1] = i;
-      //  pthread_create(&threads[i-1], NULL, wRequest, (void *) &threads_num[i-1]);
-//}
-    
-
     logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
     pthread_mutex_lock(&mutexI);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+    
+    
+
+    slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO); 
     logDelay(STDOUT_FILENO, MAIN_THREAD_ID, 0);
-
     accounts_array[ADMIN_ACCOUNT_ID] = new_account;
+    logAccountCreation(STDOUT_FILENO, MAIN_THREAD_ID, &accounts_array[ADMIN_ACCOUNT_ID]); 
+     pthread_mutex_unlock(&mutexI);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
 
-    logAccountCreation(STDOUT_FILENO, MAIN_THREAD_ID, &accounts_array[ADMIN_ACCOUNT_ID]);
-
-    pthread_mutex_unlock(&mutexI);
-    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, 0);
+  
    
+    
+    slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO); 
+    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_UNLOCK, SYNC_ROLE_ACCOUNT, 0);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
 
     //Server fifo **********************
     int fd, fd_dummy;
-
+    
     if (mkfifo(SERVER_FIFO_PATH,0660)<0)
         if (errno==EEXIST) printf("Requests FIFO already exists\n");
         else {
@@ -247,10 +321,21 @@ int  opcode;
 
 
 while(run) {
-sem_getvalue(&s1, &semV1);
+     slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO); 
+    sem_getvalue(&s1, &semV1);
 logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_WAIT, SYNC_ROLE_PRODUCER, request.value.header.pid, semV1);
 sem_wait(&s1);
 logRequest(STDOUT_FILENO, request.value.header.pid, &request);
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+
 
 numread = read (fd , buf , 1);
 buf [ numread ]= '\0';
@@ -268,24 +353,32 @@ strcpy(str, buf);               //str contém o resto da mensagem
  //re-constroi a mensagem TLV
 request = remakeTLV(opcode, length, str, request);
 
-   sem_post(&s2);
+ slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+    if(slog < 0){
+        fprintf(stderr, "Error opening USER log file.\n");
+        exit(1);
+    }
+    saved_stdout = dup(STDOUT_FILENO);
+    dup2(slog,STDOUT_FILENO);
+     sem_post(&s2);
    sem_getvalue(&s2,&semV2);
    logSyncMechSem(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_SEM_POST, SYNC_ROLE_PRODUCER, request.value.header.pid, semV2);
-
+    close(slog);
+    dup2(saved_stdout, STDOUT_FILENO);
+    close(saved_stdout);
+  
 //pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);
-
-//TODO colocar mensagem num thread e ir à conta correspondente
 
 
 buf[0] = '\0';
 numread = 0;
 
 pthread_create(&threads[numread], NULL, wRequest, (void *) &threads_num[numread]);   
-printf("OIasssssss\n");
+
 
 if(opcode == OP_SHUTDOWN) break; //TODO sai do loop e processa o fecho do servidor
 }
-    printf("OI\n");
+
 
 
 close(fd);
@@ -296,14 +389,24 @@ if (unlink(SERVER_FIFO_PATH) < 0)
 else
     printf("Server FIFO has been destroyed\n");
 //*************************************** 
-
-    logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
+ slog = open(SERVER_LOGFILE, O_WRONLY | O_CREAT | O_APPEND, 0664);
+        if(slog < 0){
+          fprintf(stderr, "Error opening USER log file.\n");
+          exit(1);
+        }
+        saved_stdout = dup(STDOUT_FILENO);
+        dup2(slog,STDOUT_FILENO);
+        logSyncMech(STDOUT_FILENO, MAIN_THREAD_ID, SYNC_OP_MUTEX_LOCK, SYNC_ROLE_ACCOUNT, 0);
     //printf(syncM);
  //   pthread_mutex_lock(&mutexI);
     logDelay(STDOUT_FILENO, MAIN_THREAD_ID, 0);
 
   //  pthread_mutex_unlock(&mutexI);
 
+        close(slog);
+        dup2(saved_stdout, STDOUT_FILENO);
+        close(saved_stdout);
+    
 
    for(int i = 0; i < num_eletronic_counter; i++){
         pthread_join(threads[i],NULL);

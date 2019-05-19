@@ -70,7 +70,7 @@ if ((fd = open(FIFO_reply_name, O_WRONLY | O_CREAT | O_APPEND, 0660)) < 0){
         exit(1);
     } 
     else {
-        printf("Open Successfully");
+        printf(" ");
     }
 
     int write_result = write(fd, reply_str, tlv_reply.length);

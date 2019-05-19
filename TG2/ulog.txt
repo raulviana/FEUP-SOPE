@@ -1,45 +1,226 @@
 
-E - 07450 - [ 45 bytes] 07450 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 07450 - [ 20 bytes] 0000   CREATE           OK
-E - 07458 - [ 45 bytes] 07458 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07458 - [ 20 bytes] 0000   CREATE           OK
-E - 07466 - [ 44 bytes] 07466 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07466 - [ 20 bytes] 0000   CREATE    ID_IN_USE
-E - 07471 - [ 40 bytes] 07471 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
-R - 07471 - [ 20 bytes] 0003   CREATE    OP_NALLOW
-E - 07477 - [ 29 bytes] 07477 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
-R - 07477 - [ 20 bytes] 0003 TRANSFER           OK        600€
-E - 07482 - [ 29 bytes] 07482 (0003, "3passwordswrong")      [   34 ms] BALANCE 
-R - 07482 - [ 20 bytes] 0003  BALANCE           OK        200€
-E - 07487 - [ 24 bytes] 07487 (0002, "2passwords")           [   34 ms] BALANCE 
-R - 07487 - [ 20 bytes] 0002  BALANCE           OK        600€
-E - 07552 - [ 45 bytes] 07552 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 07552 - [ 20 bytes] 0000   CREATE           OK
-E - 07560 - [ 45 bytes] 07560 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07560 - [ 20 bytes] 0000   CREATE           OK
-E - 07568 - [ 44 bytes] 07568 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07568 - [ 20 bytes] 0000   CREATE    ID_IN_USE
-E - 07573 - [ 40 bytes] 07573 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
-R - 07573 - [ 20 bytes] 0003   CREATE    OP_NALLOW
-E - 07578 - [ 29 bytes] 07578 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
-R - 07578 - [ 20 bytes] 0003 TRANSFER           OK        600€
-E - 07583 - [ 29 bytes] 07583 (0003, "3passwordswrong")      [   34 ms] BALANCE 
-R - 07583 - [ 20 bytes] 0003  BALANCE           OK        200€
-E - 07588 - [ 24 bytes] 07588 (0002, "2passwords")           [   34 ms] BALANCE 
-R - 07588 - [ 20 bytes] 0002  BALANCE           OK        600€
-E - 07637 - [ 45 bytes] 07637 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
-R - 07637 - [ 20 bytes] 0000   CREATE           OK
-E - 07645 - [ 45 bytes] 07645 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07645 - [ 20 bytes] 0000   CREATE           OK
-E - 07653 - [ 44 bytes] 07653 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
-R - 07653 - [ 20 bytes] 0000   CREATE    ID_IN_USE
-E - 07658 - [ 40 bytes] 07658 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
-R - 07658 - [ 20 bytes] 0003   CREATE    OP_NALLOW
-E - 07663 - [ 29 bytes] 07663 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
-R - 07663 - [ 20 bytes] 0003 TRANSFER           OK        600€
-E - 07668 - [ 34 bytes] 07668 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
-R - 07668 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
-E - 07674 - [ 29 bytes] 07674 (0003, "3passwordswrong")      [   34 ms] BALANCE 
-R - 07674 - [ 20 bytes] 0003  BALANCE           OK        200€
-E - 07679 - [ 24 bytes] 07679 (0002, "2passwords")           [   34 ms] BALANCE 
-R - 07679 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 07449 - [ 45 bytes] 07449 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+E - 07522 - [ 45 bytes] 07522 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07522 - [ 20 bytes] 0000   CREATE           OK
+E - 07530 - [ 45 bytes] 07530 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07530 - [ 20 bytes] 0000   CREATE           OK
+E - 07538 - [ 44 bytes] 07538 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07538 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07543 - [ 40 bytes] 07543 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07543 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07548 - [ 29 bytes] 07548 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07548 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 07553 - [ 34 bytes] 07553 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07553 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 07558 - [ 29 bytes] 07558 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07558 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 07563 - [ 24 bytes] 07563 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07563 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 07569 - [ 45 bytes] 07569 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07569 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07574 - [ 45 bytes] 07574 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07574 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07579 - [ 44 bytes] 07579 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07579 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07584 - [ 40 bytes] 07584 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07584 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07589 - [ 29 bytes] 07589 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07589 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 07594 - [ 34 bytes] 07594 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07594 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 07599 - [ 29 bytes] 07599 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07599 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 07604 - [ 24 bytes] 07604 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07604 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 07612 - [ 45 bytes] 07612 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07612 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07617 - [ 45 bytes] 07617 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07617 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07622 - [ 44 bytes] 07622 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07622 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07627 - [ 40 bytes] 07627 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07627 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07632 - [ 29 bytes] 07632 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07632 - [ 20 bytes] 0003 TRANSFER     NO_FUNDS        800€
+E - 07637 - [ 34 bytes] 07637 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07637 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 07642 - [ 29 bytes] 07642 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07642 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 07647 - [ 24 bytes] 07647 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07647 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 07750 - [ 45 bytes] 07750 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07750 - [ 20 bytes] 0000   CREATE           OK
+E - 07758 - [ 45 bytes] 07758 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07758 - [ 20 bytes] 0000   CREATE           OK
+E - 07766 - [ 44 bytes] 07766 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07766 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07771 - [ 40 bytes] 07771 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07771 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07776 - [ 29 bytes] 07776 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07776 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 07781 - [ 34 bytes] 07781 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07781 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 07786 - [ 29 bytes] 07786 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07786 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 07791 - [ 24 bytes] 07791 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07791 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 07797 - [ 45 bytes] 07797 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07797 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07802 - [ 45 bytes] 07802 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07802 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07807 - [ 44 bytes] 07807 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07807 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07812 - [ 40 bytes] 07812 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07812 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07817 - [ 29 bytes] 07817 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07817 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 07822 - [ 34 bytes] 07822 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07822 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 07827 - [ 29 bytes] 07827 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07827 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 07832 - [ 24 bytes] 07832 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07832 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 07896 - [ 45 bytes] 07896 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07896 - [ 20 bytes] 0000   CREATE           OK
+E - 07904 - [ 45 bytes] 07904 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07904 - [ 20 bytes] 0000   CREATE           OK
+E - 07912 - [ 44 bytes] 07912 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07912 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07917 - [ 40 bytes] 07917 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07917 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07922 - [ 29 bytes] 07922 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07922 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 07927 - [ 34 bytes] 07927 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07927 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 07932 - [ 29 bytes] 07932 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07932 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 07937 - [ 24 bytes] 07937 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07937 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 07943 - [ 45 bytes] 07943 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 07943 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07948 - [ 45 bytes] 07948 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07948 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07953 - [ 44 bytes] 07953 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 07953 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 07958 - [ 40 bytes] 07958 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 07958 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 07963 - [ 29 bytes] 07963 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 07963 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 07968 - [ 34 bytes] 07968 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 07968 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 07973 - [ 29 bytes] 07973 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 07973 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 07978 - [ 24 bytes] 07978 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 07978 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 08046 - [ 45 bytes] 08046 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08046 - [ 20 bytes] 0000   CREATE           OK
+E - 08054 - [ 45 bytes] 08054 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08054 - [ 20 bytes] 0000   CREATE           OK
+E - 08062 - [ 44 bytes] 08062 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08062 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08067 - [ 40 bytes] 08067 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08067 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08072 - [ 29 bytes] 08072 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08072 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 08077 - [ 34 bytes] 08077 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08077 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 08082 - [ 29 bytes] 08082 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08082 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 08087 - [ 24 bytes] 08087 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08087 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 08093 - [ 45 bytes] 08093 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08093 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08099 - [ 45 bytes] 08099 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08099 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08104 - [ 44 bytes] 08104 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08104 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08109 - [ 40 bytes] 08109 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08109 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08114 - [ 29 bytes] 08114 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08114 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 08119 - [ 34 bytes] 08119 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08119 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 08124 - [ 29 bytes] 08124 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08124 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 08129 - [ 24 bytes] 08129 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08129 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 08194 - [ 45 bytes] 08194 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08194 - [ 20 bytes] 0000   CREATE           OK
+E - 08202 - [ 45 bytes] 08202 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08202 - [ 20 bytes] 0000   CREATE           OK
+E - 08210 - [ 44 bytes] 08210 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08210 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08215 - [ 40 bytes] 08215 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08215 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08220 - [ 29 bytes] 08220 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08220 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 08225 - [ 34 bytes] 08225 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08225 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 08230 - [ 29 bytes] 08230 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08230 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 08235 - [ 24 bytes] 08235 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08235 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 08242 - [ 45 bytes] 08242 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08242 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08247 - [ 45 bytes] 08247 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08247 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08252 - [ 44 bytes] 08252 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08252 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08257 - [ 40 bytes] 08257 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08257 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08262 - [ 29 bytes] 08262 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08262 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 08267 - [ 34 bytes] 08267 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08267 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 08272 - [ 29 bytes] 08272 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08272 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 08277 - [ 24 bytes] 08277 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08277 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 08341 - [ 45 bytes] 08341 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08341 - [ 20 bytes] 0000   CREATE           OK
+E - 08349 - [ 45 bytes] 08349 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08349 - [ 20 bytes] 0000   CREATE           OK
+E - 08357 - [ 44 bytes] 08357 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08357 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08362 - [ 40 bytes] 08362 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08362 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08368 - [ 29 bytes] 08368 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08368 - [ 20 bytes] 0003 TRANSFER           OK        600€
+E - 08373 - [ 34 bytes] 08373 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08373 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        600€
+E - 08378 - [ 29 bytes] 08378 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08378 - [ 20 bytes] 0003  BALANCE           OK        200€
+E - 08383 - [ 24 bytes] 08383 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08383 - [ 20 bytes] 0002  BALANCE           OK        600€
+E - 08389 - [ 45 bytes] 08389 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08389 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08394 - [ 45 bytes] 08394 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08394 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08399 - [ 44 bytes] 08399 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08399 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08404 - [ 40 bytes] 08404 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08404 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08409 - [ 29 bytes] 08409 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08409 - [ 20 bytes] 0003 TRANSFER           OK        800€
+E - 08414 - [ 34 bytes] 08414 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08414 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 08419 - [ 29 bytes] 08419 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08419 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 08424 - [ 24 bytes] 08424 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08424 - [ 20 bytes] 0002  BALANCE           OK        800€
+E - 08430 - [ 45 bytes] 08430 (0000, "adminpass123456")      [   34 ms] CREATE   0002        400€ "2passwords"
+R - 08430 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08435 - [ 45 bytes] 08435 (0000, "adminpass123456")      [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08435 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08440 - [ 44 bytes] 08440 (0000, "adminpasswrong")       [   34 ms] CREATE   0003        400€ "3passwords"
+R - 08440 - [ 20 bytes] 0000   CREATE    ID_IN_USE
+E - 08445 - [ 40 bytes] 08445 (0003, "3passwords")           [   34 ms] CREATE   0004        400€ "4passwords"
+R - 08445 - [ 20 bytes] 0003   CREATE    OP_NALLOW
+E - 08450 - [ 29 bytes] 08450 (0003, "3passwords")           [   34 ms] TRANSFER 0002        200€
+R - 08450 - [ 20 bytes] 0003 TRANSFER     NO_FUNDS        800€
+E - 08455 - [ 34 bytes] 08455 (0000, "adminpass123456")      [   34 ms] TRANSFER 0002        200€
+R - 08455 - [ 20 bytes] 0000 TRANSFER    OP_NALLOW        800€
+E - 08460 - [ 29 bytes] 08460 (0003, "3passwordswrong")      [   34 ms] BALANCE 
+R - 08460 - [ 20 bytes] 0003  BALANCE           OK          0€
+E - 08465 - [ 24 bytes] 08465 (0002, "2passwords")           [   34 ms] BALANCE 
+R - 08465 - [ 20 bytes] 0002  BALANCE           OK        800€
