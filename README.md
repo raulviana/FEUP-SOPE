@@ -3,7 +3,11 @@ Repository for SOPE course's (Sistemas Operativos) group works
 
 - Group Elements:
 Raul Viana
+
+
 [Inês Marques](https://github.com/inesmarques22) 
+
+
 [Pedro Galvão](https://github.com/pedrogalvao)
 
 - First assignment:
