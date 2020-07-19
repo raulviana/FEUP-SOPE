@@ -1,4 +1,4 @@
-# FEUP-SOPE-TG
+# FEUP SOPE
 Repository for SOPE course's (Sistemas Operativos) group works
 
 - Group Elements:
