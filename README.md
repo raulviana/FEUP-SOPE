@@ -1,5 +1,5 @@
 # FEUP SOPE
-Repository for SOPE course's (Sistemas Operativos) group works
+Repository for [**SOPE**](https://sigarra.up.pt/feup/pt/UCURR_GERAL.FICHA_UC_VIEW?pv_ocorrencia_id=419998) course's (Sistemas Operativos) group works
 
 - Group Elements:
 
